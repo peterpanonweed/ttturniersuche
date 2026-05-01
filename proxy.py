@@ -96,9 +96,43 @@ def fetch():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/websearch")
+def websearch():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify({"error": "Kein Suchbegriff"}), 400
+    try:
+        search_url = "https://www.google.com/search?q=" + requests.utils.quote(q) + "&num=10&hl=de"
+        resp = requests.get(search_url, headers=HEADERS, timeout=10)
+        html = resp.text
+        results = []
+        import re as _re
+        titles = _re.findall(r'<h3[^>]*>(.*?)</h3>', html)
+        links = _re.findall(r'href="/url\?q=(https?://[^&"]+)', html)
+        for title, link in zip(titles[:8], links[:8]):
+            clean = _re.sub(r'<[^>]+>', '', title).strip()
+            if not clean or len(clean) < 8:
+                continue
+            if any(x in link for x in ['google.', 'youtube.', 'facebook.', 'wikipedia.']):
+                continue
+            results.append({
+                "name": clean,
+                "link": link,
+                "ort": "Siehe Link",
+                "datum": "2026",
+                "offenFor": "Freie Meldung",
+                "altersklasse": "",
+                "verband": "Freier Veranstalter",
+                "external": True,
+            })
+        return jsonify({"results": results, "query": q})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "service": "TT-Turniersuche Proxy"})
+    return jsonify({"status": "ok", "service": "TT-Turniersuche Proxy v1.1"})
 
 
 if __name__ == "__main__":
