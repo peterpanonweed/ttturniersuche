@@ -35,8 +35,12 @@
   --green-d:#9FE1CB;--blue-d:#85B7EB;--amber-d:#FAC775;--red-d:#F09595;--purple-d:#AFA9EC;
 }}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
-.shell{max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5;position:relative;overflow-x:hidden}
+
+/* Hintergrund-Grafik */
+.bg-art{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.bg-art svg{width:100%;height:100%}
+.shell{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem}
 
 /* Header */
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
@@ -125,6 +129,60 @@ footer a{color:var(--text2)}
 </style>
 </head>
 <body>
+
+<!-- Hintergrund Kunst -->
+<div class="bg-art">
+<svg viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tischtennis-Tisch Andeutung -->
+  <rect x="200" y="600" width="500" height="8" rx="4" fill="rgba(30,100,180,0.06)"/>
+  <line x1="450" y1="560" x2="450" y2="640" stroke="rgba(30,100,180,0.08)" stroke-width="2"/>
+  <rect x="900" y="550" width="420" height="7" rx="3" fill="rgba(30,100,180,0.05)"/>
+  <line x1="1110" y1="515" x2="1110" y2="590" stroke="rgba(30,100,180,0.07)" stroke-width="2"/>
+
+  <!-- Spieler links — aufschlagend -->
+  <g transform="translate(80, 380)" opacity="0.07">
+    <!-- Körper -->
+    <ellipse cx="40" cy="120" rx="18" ry="35" fill="#E24B4A"/>
+    <!-- Kopf -->
+    <circle cx="40" cy="72" r="18" fill="#c8956c"/>
+    <!-- Arm mit Schläger -->
+    <line x1="52" y1="100" x2="95" y2="70" stroke="#c8956c" stroke-width="5" stroke-linecap="round"/>
+    <!-- Schläger -->
+    <ellipse cx="105" cy="62" rx="16" ry="12" fill="#E24B4A" transform="rotate(-20 105 62)"/>
+    <rect x="115" y="68" width="4" height="18" rx="2" fill="#7a4a2a" transform="rotate(-20 115 68)"/>
+    <!-- Beine -->
+    <line x1="32" y1="150" x2="18" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
+    <line x1="48" y1="150" x2="62" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Spieler rechts — zurückschlagend -->
+  <g transform="translate(1220, 350)" opacity="0.07">
+    <ellipse cx="40" cy="120" rx="18" ry="35" fill="#185FA5"/>
+    <circle cx="40" cy="72" r="18" fill="#c8956c"/>
+    <!-- Arm mit Schläger rückhand -->
+    <line x1="28" y1="100" x2="-15" y2="75" stroke="#c8956c" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="-25" cy="67" rx="16" ry="12" fill="#185FA5" transform="rotate(15 -25 67)"/>
+    <rect x="-38" y="73" width="4" height="18" rx="2" fill="#7a4a2a" transform="rotate(15 -38 73)"/>
+    <line x1="32" y1="150" x2="18" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
+    <line x1="48" y1="150" x2="62" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Ball in der Luft -->
+  <circle cx="700" cy="200" r="14" fill="rgba(255,255,255,0.12)" stroke="rgba(226,75,74,0.15)" stroke-width="2"/>
+  <circle cx="520" cy="320" r="10" fill="rgba(255,255,255,0.07)" stroke="rgba(226,75,74,0.1)" stroke-width="1.5"/>
+  <circle cx="880" cy="280" r="8" fill="rgba(255,255,255,0.06)" stroke="rgba(226,75,74,0.08)" stroke-width="1"/>
+
+  <!-- Hallenboden-Linien -->
+  <line x1="0" y1="820" x2="1400" y2="820" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+  <line x1="0" y1="780" x2="1400" y2="780" stroke="rgba(0,0,0,0.02)" stroke-width="1"/>
+
+  <!-- Dekorative Kreise -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(226,75,74,0.05)" stroke-width="1"/>
+  <circle cx="1300" cy="800" r="120" fill="none" stroke="rgba(24,95,165,0.05)" stroke-width="1"/>
+  <circle cx="700" cy="450" r="200" fill="none" stroke="rgba(29,158,117,0.04)" stroke-width="1"/>
+</svg>
+</div>
+
 <div class="shell">
 
 <div class="hdr">
@@ -147,8 +205,8 @@ footer a{color:var(--text2)}
 </div>
 
 <div class="card">
-  <!-- Altersklassen -->
-  <div class="section-label">Altersklassen <span id="ak-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+  <!-- Turnierklasse -->
+  <div class="section-label">Turnierklasse <span id="ak-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
   <div class="chips" id="ak-picker">
     <div class="chip sel" data-ak="11" onclick="toggleAK(this)">Jungen/Mädchen 11</div>
     <div class="chip sel" data-ak="13" onclick="toggleAK(this)">Jugend 13</div>
@@ -157,6 +215,7 @@ footer a{color:var(--text2)}
     <div class="chip" data-ak="nachwuchs" onclick="toggleAK(this)">Nachwuchs allg.</div>
     <div class="chip" data-ak="herren" onclick="toggleAK(this)">Damen/Herren</div>
     <div class="chip" data-ak="senioren" onclick="toggleAK(this)">Senioren</div>
+    <div class="chip" data-ak="extern" onclick="toggleAK(this)" style="border-color:var(--purple-d);color:var(--purple-d)">⊕ Verbandsfreie Turniere</div>
     <div class="chip" data-ak="" onclick="toggleAK(this)" id="chip-all-ak">Alle</div>
   </div>
 
@@ -179,7 +238,7 @@ footer a{color:var(--text2)}
   <div class="divider"></div>
 
   <!-- Stichwort -->
-  <div class="section-label">Stichwort</div>
+  <div class="section-label">Stichwortsuche</div>
   <input type="text" id="f-text" placeholder="z.B. Berlin, Cup, Open…" style="max-width:300px">
 
   <div class="divider"></div>
@@ -191,7 +250,7 @@ footer a{color:var(--text2)}
   <div style="margin-top:1rem">
     <button class="load-btn" id="btn" onclick="startFetch()">
       <div class="spin" id="spin"></div>
-      <span id="btn-lbl">Alle Verbände laden</span>
+      <span id="btn-lbl">Suchen!</span>
     </button>
   </div>
 </div>
@@ -215,6 +274,13 @@ footer a{color:var(--text2)}
   </div>
 </div>
 
+<div id="web-bar" style="display:none;margin-bottom:0.75rem">
+  <button onclick="searchWeb()" id="btn-web" style="display:inline-flex;align-items:center;gap:8px;padding:0 18px;height:36px;background:transparent;color:var(--text2);border:0.5px solid var(--border2);border-radius:var(--r);font-size:14px;cursor:pointer">
+    <div class="spin" id="spin-web" style="border-top-color:var(--text2);border-color:var(--border2)"></div>
+    ⊕ Freie Turniere aus dem Web suchen
+  </button>
+</div>
+
 <div class="status-row" id="status">Wähle Filter und klicke "Alle Verbände laden".</div>
 
 <!-- Split: Liste links, Karte rechts -->
@@ -224,7 +290,10 @@ footer a{color:var(--text2)}
 </div>
 
 <footer>
-  Datenquellen: <a href="https://dttb.click-tt.de" target="_blank">click-TT / DTTB</a> · alle 18 Landesverbände · kein offizielles Produkt des DTTB · v0.4
+  <p style="font-size:13px;color:var(--text2);max-width:600px;margin:0 auto 1rem;line-height:1.7;font-style:italic">
+    Diese Seite ist ein privates Hobbyprojekt — entwickelt von einem Tischtennisvater, weil so eine Übersicht einfach gefehlt hat. Keine Verbindung zum DTTB oder einem Landesverband. Alle Daten kommen direkt von den offiziellen click-TT Seiten der Verbände. Feedback willkommen, Kritik auch — aber bitte nett. 🏓
+  </p>
+  Datenquellen: <a href="https://dttb.click-tt.de" target="_blank">click-TT / DTTB</a> · alle 18 Landesverbände · kein offizielles Produkt des DTTB · v0.5
   <p style="margin-top:0.75rem;font-size:11px;color:var(--text3);max-width:600px;margin-left:auto;margin-right:auto">
     Tischtennis Turniere Deutschland · Tischtennisturnier Suche · Tischtennis Turnierkalender ·
     Jugend Tischtennis U11 U13 U15 U19 · Nachwuchs Tischtennis · Offene Tischtennisturniere · DTTB · click-TT
@@ -323,14 +392,15 @@ function toggleAK(chip){
   const ak=chip.dataset.ak;
   if(ak===''){
     selectedAKs.clear();
-    document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.remove('sel'));
-    chip.classList.add('sel');
+    document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
   } else {
     document.getElementById('chip-all-ak').classList.remove('sel');
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedAKs.add(ak);
     else selectedAKs.delete(ak);
-    if(selectedAKs.size===0) document.getElementById('chip-all-ak').classList.add('sel');
+    if(selectedAKs.size===0){
+      document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
+    }
   }
   document.getElementById('ak-count').textContent=selectedAKs.size===0?'(alle)':`(${selectedAKs.size} ausgewählt)`;
   render();
@@ -341,14 +411,13 @@ function toggleMo(chip){
   const mo=chip.dataset.mo;
   if(mo===''){
     selectedMonate.clear();
-    document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.remove('sel'));
-    chip.classList.add('sel');
+    document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.add('sel'));
   } else {
     document.getElementById('chip-all-mo').classList.remove('sel');
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedMonate.add(mo);
     else selectedMonate.delete(mo);
-    if(selectedMonate.size===0) document.getElementById('chip-all-mo').classList.add('sel');
+    if(selectedMonate.size===0) document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.add('sel'));
   }
   document.getElementById('mo-count').textContent=selectedMonate.size===0?'(alle)':`(${selectedMonate.size} ausgewählt)`;
   render();
@@ -357,22 +426,36 @@ function toggleMo(chip){
 // Verbände Picker
 function buildTabs(){
   document.getElementById('vtabs').innerHTML=
-    `<div class="chip sel" id="vtab-alle" onclick="toggleV('alle',this)">Alle</div>`+
-    VERBÄNDE.map(v=>`<div class="chip" id="vtab-${v.k}" onclick="toggleV('${v.k}',this)">${v.name}</div>`).join('');
+    `<div class="chip" id="vtab-keine" onclick="toggleV('keine',this)">Keine</div>`+
+    VERBÄNDE.map(v=>`<div class="chip" id="vtab-${v.k}" onclick="toggleV('${v.k}',this)">${v.name}</div>`).join('')+
+    `<div class="chip sel" id="vtab-alle" onclick="toggleV('alle',this)">Alle</div>`;
 }
+
+// selectedVerbände: leer = alle, 'KEINE' = nur externe, sonst spezifische Verbände
 function toggleV(k,el){
   if(k==='alle'){
     selectedVerbände.clear();
     document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
     el.classList.add('sel');
+  } else if(k==='keine'){
+    selectedVerbände.clear();
+    selectedVerbände.add('KEINE');
+    document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
+    el.classList.add('sel');
   } else {
     document.getElementById('vtab-alle').classList.remove('sel');
+    document.getElementById('vtab-keine').classList.remove('sel');
+    selectedVerbände.delete('KEINE');
     el.classList.toggle('sel');
     if(el.classList.contains('sel')) selectedVerbände.add(k);
     else selectedVerbände.delete(k);
-    if(selectedVerbände.size===0) document.getElementById('vtab-alle').classList.add('sel');
+    if(selectedVerbände.size===0){
+      document.getElementById('vtab-alle').classList.add('sel');
+    }
   }
-  document.getElementById('vb-count').textContent=selectedVerbände.size===0?'(alle)':`(${selectedVerbände.size} ausgewählt)`;
+  const size=selectedVerbände.size;
+  document.getElementById('vb-count').textContent=
+    size===0?'(alle)':selectedVerbände.has('KEINE')?'(keine)':`(${size} ausgewählt)`;
   render();
 }
 
@@ -395,6 +478,7 @@ function matchAK(t){
   if(selectedAKs.size===0) return true;
   const hay=((t.altersklasse||'')+' '+(t.name||'')).toLowerCase();
   for(const ak of selectedAKs){
+    if(ak==='extern') return !!t.external;
     if(ak==='nachwuchs'&&(hay.includes('nachwuchs')||hay.includes('jugend')||hay.includes('mini'))) return true;
     if(ak==='herren'&&(hay.includes('herren')||hay.includes('damen'))) return true;
     if(ak==='senioren'&&hay.includes('senior')) return true;
@@ -477,6 +561,7 @@ function highlightCard(idx){
 function render(){
   const txt=document.getElementById('f-text').value.toLowerCase();
   let fil=allT.filter(t=>{
+    if(selectedVerbände.has('KEINE')) return !!t.external;
     if(selectedVerbände.size>0&&!selectedVerbände.has(t.k)) return false;
     if(!matchAK(t)) return false;
     if(txt&&!((t.name||'').toLowerCase().includes(txt)||(t.ort||'').toLowerCase().includes(txt)||(t.verband||'').toLowerCase().includes(txt))) return false;
@@ -492,6 +577,7 @@ function render(){
   const sb=document.getElementById('sumbar');
   if(allT.length>SEED.length||fil.length>0){
     sb.style.display='grid';
+    document.getElementById('web-bar').style.display='block';
     document.getElementById('s-tot').textContent=fil.length;
     document.getElementById('s-sub').textContent=`von ${allT.length} insgesamt`;
     document.getElementById('s-jug').textContent=jugend.length;
@@ -530,6 +616,35 @@ function render(){
       :`<div class="tcard" onclick="highlightCard(${idx})">${inner}</div>`;
     return cardEl;
   }).join('');
+}
+
+// Web-Suche für freie Turniere
+async function searchWeb(){
+  const sw=document.getElementById('spin-web');
+  const btn=document.getElementById('btn-web');
+  sw.style.display='block'; btn.disabled=true;
+  const mo=selectedMonate.size>0?[...selectedMonate][0]:'2026-05';
+  const [yr,m]=mo.split('-');
+  const monate=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  const moName=monate[parseInt(m)-1];
+  const q=`Tischtennis Turnier ${moName} ${yr} offen anmelden Deutschland`;
+  try{
+    const r=await fetch(PROXY_BASE+'/websearch?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(15000)});
+    const j=await r.json();
+    if(j.results&&j.results.length>0){
+      let added=0;
+      j.results.forEach(res=>{
+        if(!allT.find(x=>x.name===res.name)){allT.push({...res,k:'EXT',external:true});added++;}
+      });
+      document.getElementById('status').textContent=`${added} freie Turniere aus dem Web hinzugefügt.`;
+    } else {
+      document.getElementById('status').textContent='Keine zusätzlichen freien Turniere gefunden.';
+    }
+  }catch{
+    document.getElementById('status').textContent='Web-Suche nicht verfügbar — Proxy nötig.';
+  }
+  sw.style.display='none'; btn.disabled=false;
+  render();
 }
 
 // Fetch
@@ -578,7 +693,7 @@ async function startFetch(){
   }
 
   btn.disabled=false;spin.style.display='none';
-  document.getElementById('btn-lbl').textContent='Neu laden';
+  document.getElementById('btn-lbl').textContent='Neu suchen!';
   document.getElementById('status').textContent=`${allT.length} Turniere geladen.`;
   setTimeout(()=>{if(dotsEl)dotsEl.style.display='none'},2000);
 }
