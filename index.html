@@ -395,12 +395,10 @@ function toggleAK(chip){
     document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
   } else {
     document.getElementById('chip-all-ak').classList.remove('sel');
+    document.querySelectorAll('#ak-picker .chip').forEach(c=>{if(c.dataset.ak==='')c.classList.remove('sel')});
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedAKs.add(ak);
     else selectedAKs.delete(ak);
-    if(selectedAKs.size===0){
-      document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
-    }
   }
   document.getElementById('ak-count').textContent=selectedAKs.size===0?'(alle)':`(${selectedAKs.size} ausgewählt)`;
   render();
@@ -414,10 +412,10 @@ function toggleMo(chip){
     document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.add('sel'));
   } else {
     document.getElementById('chip-all-mo').classList.remove('sel');
+    document.querySelectorAll('#mo-picker .chip').forEach(c=>{if(c.dataset.mo==='')c.classList.remove('sel')});
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedMonate.add(mo);
     else selectedMonate.delete(mo);
-    if(selectedMonate.size===0) document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.add('sel'));
   }
   document.getElementById('mo-count').textContent=selectedMonate.size===0?'(alle)':`(${selectedMonate.size} ausgewählt)`;
   render();
