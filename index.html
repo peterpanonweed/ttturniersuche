@@ -13,7 +13,7 @@
 <meta property="og:url" content="https://ttturniersuche.de">
 <link rel="canonical" href="https://ttturniersuche.de">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Tischtennis Turniersuche","description":"Bundesweiter Tischtennis Turnierkalender Deutschland","url":"https://ttturniersuche.de","applicationCategory":"SportsApplication"}</script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 :root{
   --red:#E24B4A;--red-l:#FCEBEB;--red-d:#791F1F;
@@ -186,13 +186,9 @@ footer a{color:var(--text2)}
 
   <!-- Verbände + Button -->
   <div class="section-label">Verbände <span id="vb-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
-  <div class="verbands-row">
-    <div class="verbands-chips">
-      <div class="chips" id="vtabs">
-        <!-- wird per JS gebaut -->
-      </div>
-      <div class="chip-hint">Mehrfachauswahl möglich</div>
-    </div>
+  <div class="chips" id="vtabs"></div>
+  <div class="chip-hint">Mehrfachauswahl möglich</div>
+  <div style="margin-top:1rem">
     <button class="load-btn" id="btn" onclick="startFetch()">
       <div class="spin" id="spin"></div>
       <span id="btn-lbl">Alle Verbände laden</span>
@@ -236,7 +232,7 @@ footer a{color:var(--text2)}
 </footer>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const PROXY_BASE = "https://ttturniersuche.onrender.com";
 let useProxy = false;
