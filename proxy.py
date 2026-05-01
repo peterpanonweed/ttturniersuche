@@ -101,23 +101,22 @@ def websearch():
     q = request.args.get("q", "").strip()
     if not q:
         return jsonify({"error": "Kein Suchbegriff"}), 400
+    
+    api_key = "DEIN_GOOGLE_API_KEY_HIER"
+    cx = "a73d0148af8b3477a"
+    
     try:
-        search_url = "https://www.google.com/search?q=" + requests.utils.quote(q) + "&num=10&hl=de"
-        resp = requests.get(search_url, headers=HEADERS, timeout=10)
-        html = resp.text
+        url = f"https://www.googleapis.com/customsearch/v1?key={api_key}&cx={cx}&q={requests.utils.quote(q)}&num=10&lr=lang_de"
+        resp = requests.get(url, timeout=10)
+        data = resp.json()
+        if "items" not in data:
+            return jsonify({"results": [], "query": q})
         results = []
-        import re as _re
-        titles = _re.findall(r'<h3[^>]*>(.*?)</h3>', html)
-        links = _re.findall(r'href="/url\?q=(https?://[^&"]+)', html)
-        for title, link in zip(titles[:8], links[:8]):
-            clean = _re.sub(r'<[^>]+>', '', title).strip()
-            if not clean or len(clean) < 8:
-                continue
-            if any(x in link for x in ['google.', 'youtube.', 'facebook.', 'wikipedia.']):
-                continue
+        for item in data["items"]:
             results.append({
-                "name": clean,
-                "link": link,
+                "name": item.get("title", ""),
+                "link": item.get("link", ""),
+                "snippet": item.get("snippet", ""),
                 "ort": "Siehe Link",
                 "datum": "2026",
                 "offenFor": "Freie Meldung",
