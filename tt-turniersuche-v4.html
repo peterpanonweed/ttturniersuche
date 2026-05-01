@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tischtennis Turniersuche — Bundesweiter Turnierkalender Deutschland</title>
+<meta name="description" content="Bundesweiter Tischtennis Turnierkalender: Alle Tischtennisturniere in Deutschland. 18 Landesverbände, Jugend U11, U13, U15, U19, offene Turniere und Nachwuchswettbewerbe.">
+<meta name="keywords" content="Tischtennis Turnier, Tischtennisturnier, Tischtennis Turnierkalender, Tischtennis Deutschland, Jugend Tischtennis, Tischtennis U11, Tischtennis U13, Nachwuchs Tischtennis, click-TT, DTTB">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Tischtennis Turniersuche Deutschland">
+<meta property="og:description" content="Alle Tischtennisturniere in Deutschland — 18 Landesverbände, Jugend, Nachwuchs, offene Turniere.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ttturniersuche.de">
+<link rel="canonical" href="https://ttturniersuche.de">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Tischtennis Turniersuche","description":"Bundesweiter Tischtennis Turnierkalender Deutschland","url":"https://ttturniersuche.de","applicationCategory":"SportsApplication"}</script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{
+  --red:#E24B4A;--red-l:#FCEBEB;--red-d:#791F1F;
+  --green-l:#EAF3DE;--green-d:#27500A;
+  --blue-l:#E6F1FB;--blue-d:#0C447C;
+  --amber-l:#FAEEDA;--amber-d:#633806;
+  --purple-l:#EEEDFE;--purple-d:#3C3489;
+  --teal:#1D9E75;
+  --bg:#fff;--bg2:#f5f4f0;--bg3:#eceae3;
+  --text:#1a1a18;--text2:#6b6b67;--text3:#a0a09c;
+  --border:rgba(0,0,0,0.11);--border2:rgba(0,0,0,0.2);
+  --r:10px;--rl:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1a;--bg2:#252522;--bg3:#2d2d2a;
+  --text:#f0ede5;--text2:#9a9a95;--text3:#686864;
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.17);
+  --red-l:#3a1515;--green-l:#122310;--blue-l:#0c1e35;--amber-l:#2a1a05;--purple-l:#1a1840;
+  --green-d:#9FE1CB;--blue-d:#85B7EB;--amber-d:#FAC775;--red-d:#F09595;--purple-d:#AFA9EC;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+.shell{max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+/* Header */
+.hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
+.hdr-txt h1{font-size:22px;font-weight:600}
+.hdr-txt p{font-size:13px;color:var(--text2);margin-top:1px}
+
+/* Proxy bar */
+.proxy-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin-bottom:1rem;padding:6px 10px;border-radius:var(--r);background:var(--bg2);border:0.5px solid var(--border)}
+.proxy-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.proxy-dot.ok{background:var(--teal)}
+.proxy-dot.err{background:var(--red)}
+
+/* Filter card */
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:0.75rem}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text2);font-weight:500;margin-bottom:6px}
+
+/* Chips universal */
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:12px;padding:5px 11px;border-radius:99px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;user-select:none;transition:all 0.12s}
+.chip:hover{color:var(--text);border-color:var(--border2)}
+.chip.sel{background:var(--red);color:#fff;border-color:var(--red)}
+.chip-hint{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* Divider */
+.divider{height:0.5px;background:var(--border);margin:1rem 0}
+
+/* Verbände + Button Zeile */
+.verbands-row{display:flex;align-items:flex-start;gap:12px}
+.verbands-chips{flex:1}
+.load-btn{display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:38px;background:var(--red);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s;white-space:nowrap;flex-shrink:0;margin-top:0}
+.load-btn:hover{opacity:0.87}
+.load-btn:disabled{opacity:0.38;cursor:default}
+.spin{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin .65s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Stichwort */
+input[type=text]{font-size:14px;padding:7px 12px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);outline:none;height:36px;width:100%}
+input:focus{border-color:var(--red)}
+
+/* Summary */
+.sumbar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0.75rem}
+.scard{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:0.75rem 1rem}
+.scard .num{font-size:24px;font-weight:600;line-height:1}
+.scard .lbl{font-size:12px;color:var(--text2);margin-top:3px;font-weight:500}
+.scard .sub{font-size:11px;color:var(--text3);margin-top:2px}
+.scard.c-red{border-left:3px solid var(--red)}
+.scard.c-teal{border-left:3px solid var(--teal)}
+
+/* Status */
+.status-row{font-size:13px;color:var(--text2);margin-bottom:0.6rem;min-height:18px;display:flex;align-items:center;gap:8px}
+
+/* Split view */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+@media(max-width:700px){.split{grid-template-columns:1fr}}
+
+/* Karte */
+#map{width:100%;height:600px;border-radius:var(--rl);border:0.5px solid var(--border);position:sticky;top:1rem}
+
+/* Liste */
+.tlist{display:flex;flex-direction:column;gap:7px}
+.tcard{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:0.85rem 1rem;display:grid;grid-template-columns:60px 1fr auto;gap:10px;align-items:center;text-decoration:none;color:inherit;transition:border-color 0.13s;cursor:pointer}
+.tcard:hover{border-color:var(--border2)}
+.tcard.external{border-left:3px solid var(--purple-d)}
+.tcard.highlighted{border-color:var(--red);box-shadow:0 0 0 2px rgba(226,75,74,0.15)}
+.datebox{background:var(--bg2);border-radius:var(--r);padding:6px 4px;text-align:center;flex-shrink:0}
+.dday{font-size:20px;font-weight:600;line-height:1}
+.drest{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;margin-top:2px}
+.tname{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.3}
+.badges{display:flex;flex-wrap:wrap;gap:3px}
+.badge{font-size:10px;padding:2px 7px;border-radius:99px;white-space:nowrap;font-weight:500}
+.bv{background:var(--blue-l);color:var(--blue-d)}
+.bext{background:var(--purple-l);color:var(--purple-d)}
+.bo{background:var(--bg2);color:var(--text2);border:0.5px solid var(--border)}
+.bak{background:var(--amber-l);color:var(--amber-d)}
+.bak-u11{background:#FCEBEB;color:#E24B4A}
+.bak-u13{background:#E6F1FB;color:#185FA5}
+.bak-u15{background:#E1F5EE;color:#0F6E56}
+.bak-u19{background:#FAEEDA;color:#854F0B}
+.bopen{background:var(--green-l);color:var(--green-d)}
+.bclosed{background:var(--red-l);color:var(--red-d)}
+.tarrow{font-size:14px;color:var(--text3)}
+.empty{text-align:center;padding:2rem 1rem;color:var(--text2);font-size:14px}
+
+footer{margin-top:2rem;text-align:center;font-size:12px;color:var(--text3)}
+footer a{color:var(--text2)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="hdr">
+  <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+    <rect x="27" y="30" width="5" height="16" rx="2.5" fill="#7a4a2a" transform="rotate(-38 27 30)"/>
+    <circle cx="19" cy="19" r="15" fill="#E24B4A"/>
+    <circle cx="19" cy="19" r="15" fill="none" stroke="#c03a39" stroke-width="1"/>
+    <circle cx="37" cy="7" r="5" fill="white" stroke="#ddd" stroke-width="1"/>
+  </svg>
+  <div class="hdr-txt">
+    <h1>Tischtennis Turniersuche</h1>
+    <p>Bundesweiter Aggregator für Tischtennisturniere · 18 Landesverbände · freie Turniere</p>
+  </div>
+</div>
+
+<div class="proxy-bar">
+  <div class="proxy-dot" id="pdot"></div>
+  <span id="pstatus">Prüfe Verbindung…</span>
+  <span id="pmode" style="margin-left:auto;font-weight:500"></span>
+</div>
+
+<div class="card">
+  <!-- Altersklassen -->
+  <div class="section-label">Altersklassen <span id="ak-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+  <div class="chips" id="ak-picker">
+    <div class="chip sel" data-ak="11" onclick="toggleAK(this)">Jungen/Mädchen 11</div>
+    <div class="chip sel" data-ak="13" onclick="toggleAK(this)">Jugend 13</div>
+    <div class="chip" data-ak="15" onclick="toggleAK(this)">Jugend 15</div>
+    <div class="chip" data-ak="19" onclick="toggleAK(this)">Jugend 19</div>
+    <div class="chip" data-ak="nachwuchs" onclick="toggleAK(this)">Nachwuchs allg.</div>
+    <div class="chip" data-ak="herren" onclick="toggleAK(this)">Damen/Herren</div>
+    <div class="chip" data-ak="senioren" onclick="toggleAK(this)">Senioren</div>
+    <div class="chip" data-ak="" onclick="toggleAK(this)" id="chip-all-ak">Alle</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Monate -->
+  <div class="section-label">Monate <span id="mo-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+  <div class="chips" id="mo-picker">
+    <div class="chip sel" data-mo="2026-05" onclick="toggleMo(this)">Mai 26</div>
+    <div class="chip" data-mo="2026-06" onclick="toggleMo(this)">Jun 26</div>
+    <div class="chip" data-mo="2026-07" onclick="toggleMo(this)">Jul 26</div>
+    <div class="chip" data-mo="2026-08" onclick="toggleMo(this)">Aug 26</div>
+    <div class="chip" data-mo="2026-09" onclick="toggleMo(this)">Sep 26</div>
+    <div class="chip" data-mo="2026-10" onclick="toggleMo(this)">Okt 26</div>
+    <div class="chip" data-mo="2026-11" onclick="toggleMo(this)">Nov 26</div>
+    <div class="chip" data-mo="2026-12" onclick="toggleMo(this)">Dez 26</div>
+    <div class="chip" data-mo="" onclick="toggleMo(this)" id="chip-all-mo">Alle</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Stichwort -->
+  <div class="section-label">Stichwort</div>
+  <input type="text" id="f-text" placeholder="z.B. Berlin, Cup, Open…" style="max-width:300px">
+
+  <div class="divider"></div>
+
+  <!-- Verbände + Button -->
+  <div class="section-label">Verbände <span id="vb-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+  <div class="verbands-row">
+    <div class="verbands-chips">
+      <div class="chips" id="vtabs">
+        <!-- wird per JS gebaut -->
+      </div>
+      <div class="chip-hint">Mehrfachauswahl möglich</div>
+    </div>
+    <button class="load-btn" id="btn" onclick="startFetch()">
+      <div class="spin" id="spin"></div>
+      <span id="btn-lbl">Alle Verbände laden</span>
+    </button>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="sumbar" id="sumbar" style="display:none">
+  <div class="scard c-red">
+    <div class="num" id="s-tot">0</div>
+    <div class="lbl">Turniere gesamt</div>
+    <div class="sub" id="s-sub">in dieser Auswahl</div>
+  </div>
+  <div class="scard c-red">
+    <div class="num" id="s-jug">0</div>
+    <div class="lbl">Nachwuchsturniere</div>
+    <div class="sub">Jugend &amp; Mini</div>
+  </div>
+  <div class="scard c-teal">
+    <div class="num" id="s-op">0</div>
+    <div class="lbl">Freie Meldung</div>
+    <div class="sub">offen für alle Verbände</div>
+  </div>
+</div>
+
+<div class="status-row" id="status">Wähle Filter und klicke "Alle Verbände laden".</div>
+
+<!-- Split: Liste links, Karte rechts -->
+<div class="split">
+  <div class="tlist" id="results"></div>
+  <div id="map"></div>
+</div>
+
+<footer>
+  Datenquellen: <a href="https://dttb.click-tt.de" target="_blank">click-TT / DTTB</a> · alle 18 Landesverbände · kein offizielles Produkt des DTTB · v0.4
+  <p style="margin-top:0.75rem;font-size:11px;color:var(--text3);max-width:600px;margin-left:auto;margin-right:auto">
+    Tischtennis Turniere Deutschland · Tischtennisturnier Suche · Tischtennis Turnierkalender ·
+    Jugend Tischtennis U11 U13 U15 U19 · Nachwuchs Tischtennis · Offene Tischtennisturniere · DTTB · click-TT
+  </p>
+</footer>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const PROXY_BASE = "https://ttturniersuche.onrender.com";
+let useProxy = false;
+let leafletMap = null;
+let currentFiltered = [];
+let mapMarkers = [];
+
+const VERBÄNDE = [
+  {k:'DTTB',  name:'DTTB (Bund)',       base:'https://dttb.click-tt.de', fed:'DTTB'},
+  {k:'BTTV',  name:'Berlin',            base:'https://ohne.click-tt.de', fed:'BTTV'},
+  {k:'TTVB',  name:'Brandenburg',       base:'https://ttvb.click-tt.de', fed:'TTVB'},
+  {k:'BTTV-B',name:'Bayern',            base:'https://bttv.click-tt.de', fed:'BTTV'},
+  {k:'WTTV',  name:'Westdeutschland',   base:'https://wttv.click-tt.de', fed:'WTTV'},
+  {k:'HTTV',  name:'Hessen',            base:'https://httv.click-tt.de', fed:'HTTV'},
+  {k:'TTBW',  name:'Baden-Württemberg', base:'https://ttbw.click-tt.de', fed:'TTBW'},
+  {k:'TTVN',  name:'Niedersachsen',     base:'https://ttvn.click-tt.de', fed:'TTVN'},
+  {k:'TTVMV', name:'Mecklenburg-Vorp.', base:'https://ttvmv.click-tt.de',fed:'TTVMV'},
+  {k:'STTB',  name:'Saarland',          base:'https://sttb.click-tt.de', fed:'STTB'},
+  {k:'RTTVR', name:'Rheinland',         base:'https://rttvr.click-tt.de',fed:'RTTVR'},
+  {k:'TTTV',  name:'Thüringen',         base:'https://tttv.click-tt.de', fed:'TTTV'},
+  {k:'TTVSA', name:'Sachsen-Anhalt',    base:'https://ttvsa.click-tt.de',fed:'TTVSA'},
+  {k:'HATTV', name:'Hamburg',           base:'https://hattv.click-tt.de',fed:'HATTV'},
+  {k:'FTTB',  name:'Bremen',            base:'https://fttb.click-tt.de', fed:'FTTB'},
+  {k:'PTTV',  name:'Pfalz',             base:'https://pttv.click-tt.de', fed:'PTTV'},
+  {k:'STTV',  name:'Sachsen',           base:'https://ohne.click-tt.de', fed:'STTV'},
+  {k:'TTVSH', name:'Schleswig-Holstein',base:'https://ohne.click-tt.de', fed:'TTVSH'},
+];
+
+const GEO = {
+  'Berlin':{lat:52.52,lng:13.405},'Hamburg':{lat:53.55,lng:10.0},'München':{lat:48.137,lng:11.575},
+  'Köln':{lat:50.937,lng:6.96},'Frankfurt':{lat:50.11,lng:8.682},'Stuttgart':{lat:48.775,lng:9.182},
+  'Düsseldorf':{lat:51.227,lng:6.773},'Dortmund':{lat:51.514,lng:7.465},'Essen':{lat:51.457,lng:7.012},
+  'Bremen':{lat:53.079,lng:8.801},'Leipzig':{lat:51.34,lng:12.374},'Dresden':{lat:51.05,lng:13.737},
+  'Hannover':{lat:52.374,lng:9.738},'Nürnberg':{lat:49.452,lng:11.077},'Erfurt':{lat:50.984,lng:11.029},
+  'Magdeburg':{lat:52.131,lng:11.628},'Kiel':{lat:54.323,lng:10.122},'Rostock':{lat:54.092,lng:12.099},
+  'Saarbrücken':{lat:49.235,lng:6.996},'Mainz':{lat:49.999,lng:8.274},'Wiesbaden':{lat:50.082,lng:8.243},
+  'Gotha':{lat:50.949,lng:10.701},'Lauenburg':{lat:53.371,lng:10.558},'Saalfeld':{lat:50.647,lng:11.356},
+  'Saalfeld-Rudolstadt':{lat:50.647,lng:11.356},'Ortenau':{lat:48.477,lng:7.947},
+  'Eislingen':{lat:48.694,lng:9.703},'Rhein-Wupper':{lat:51.083,lng:7.117},
+  'Westpfalz':{lat:49.45,lng:7.75},'Kaiserslautern':{lat:49.444,lng:7.769},
+  'Harburg':{lat:53.461,lng:9.984},'Niederrhein':{lat:51.5,lng:6.8},
+};
+
+function getCoords(ort){
+  if(!ort) return null;
+  for(const [k,v] of Object.entries(GEO)){
+    if(ort.toLowerCase().includes(k.toLowerCase())) return v;
+  }
+  return null;
+}
+
+const SEED = [
+  {datum:'09.05.2026 - 10.05.2026',name:'3. Kladow Cup',ort:'Berlin',offenFor:'ITTF',altersklasse:'Nachwuchs / Damen/Herren',verband:'Berlin',k:'BTTV',id:'775100'},
+  {datum:'15.05.2026 - 17.05.2026',name:'Talent-Cup Jugend 11 (DTTB)',ort:'Saalfeld-Rudolstadt',offenFor:'keine freie Meldung',altersklasse:'Jugend 11',verband:'DTTB (Bund)',k:'DTTB',id:'767840'},
+  {datum:'04.06.2026 - 07.06.2026',name:'TT-Finals Erfurt 2026',ort:'Erfurt',offenFor:'Deutschland',altersklasse:'Jugend 15 / Jugend 19 / Damen/Herren',verband:'DTTB (Bund)',k:'DTTB',id:''},
+  {datum:'01.08.2026 - 31.08.2026',name:'andro Kids Open (Borussia Düsseldorf)',ort:'Düsseldorf',offenFor:'ITTF',altersklasse:'Nachwuchs Jugend 11 bis Jugend 19',verband:'Westdeutschland',k:'WTTV',id:''},
+  {datum:'01.09.2026 - 28.02.2027',name:'mini-Meisterschaften 2026/27',ort:'Bundesweit',offenFor:'Deutschland',altersklasse:'Jugend 11 / Jugend 13',verband:'DTTB (Bund)',k:'DTTB',id:''},
+  {datum:'01.05.2026 - 01.09.2026',name:'myTT Sommer-Team-Cup',ort:'Niederrhein',offenFor:'Deutschland',altersklasse:'Damen/Herren',verband:'DTTB (Bund)',k:'DTTB',id:'729480'},
+];
+
+let allT = [...SEED];
+let selectedAKs = new Set(['11','13']);
+let selectedMonate = new Set(['2026-05']);
+let selectedVerbände = new Set();
+
+// Proxy
+async function checkProxy(){
+  try{
+    const r=await fetch(PROXY_BASE+'/health',{signal:AbortSignal.timeout(4000)});
+    const j=await r.json();
+    if(j.status==='ok'){
+      useProxy=true;
+      document.getElementById('pdot').classList.add('ok');
+      document.getElementById('pstatus').textContent='Proxy aktiv — Live-Daten verfügbar';
+      document.getElementById('pmode').textContent='LIVE';
+      document.getElementById('pmode').style.color='var(--teal)';
+    }
+  }catch{
+    document.getElementById('pdot').classList.add('err');
+    document.getElementById('pstatus').textContent='Kein Proxy — Seed-Daten aktiv. Starte proxy.py für Live-Daten.';
+    document.getElementById('pmode').textContent='OFFLINE';
+    document.getElementById('pmode').style.color='var(--text3)';
+  }
+}
+
+// AK Picker
+function toggleAK(chip){
+  const ak=chip.dataset.ak;
+  if(ak===''){
+    selectedAKs.clear();
+    document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.remove('sel'));
+    chip.classList.add('sel');
+  } else {
+    document.getElementById('chip-all-ak').classList.remove('sel');
+    chip.classList.toggle('sel');
+    if(chip.classList.contains('sel')) selectedAKs.add(ak);
+    else selectedAKs.delete(ak);
+    if(selectedAKs.size===0) document.getElementById('chip-all-ak').classList.add('sel');
+  }
+  document.getElementById('ak-count').textContent=selectedAKs.size===0?'(alle)':`(${selectedAKs.size} ausgewählt)`;
+  render();
+}
+
+// Monate Picker
+function toggleMo(chip){
+  const mo=chip.dataset.mo;
+  if(mo===''){
+    selectedMonate.clear();
+    document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.remove('sel'));
+    chip.classList.add('sel');
+  } else {
+    document.getElementById('chip-all-mo').classList.remove('sel');
+    chip.classList.toggle('sel');
+    if(chip.classList.contains('sel')) selectedMonate.add(mo);
+    else selectedMonate.delete(mo);
+    if(selectedMonate.size===0) document.getElementById('chip-all-mo').classList.add('sel');
+  }
+  document.getElementById('mo-count').textContent=selectedMonate.size===0?'(alle)':`(${selectedMonate.size} ausgewählt)`;
+  render();
+}
+
+// Verbände Picker
+function buildTabs(){
+  document.getElementById('vtabs').innerHTML=
+    `<div class="chip sel" id="vtab-alle" onclick="toggleV('alle',this)">Alle</div>`+
+    VERBÄNDE.map(v=>`<div class="chip" id="vtab-${v.k}" onclick="toggleV('${v.k}',this)">${v.name}</div>`).join('');
+}
+function toggleV(k,el){
+  if(k==='alle'){
+    selectedVerbände.clear();
+    document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
+    el.classList.add('sel');
+  } else {
+    document.getElementById('vtab-alle').classList.remove('sel');
+    el.classList.toggle('sel');
+    if(el.classList.contains('sel')) selectedVerbände.add(k);
+    else selectedVerbände.delete(k);
+    if(selectedVerbände.size===0) document.getElementById('vtab-alle').classList.add('sel');
+  }
+  document.getElementById('vb-count').textContent=selectedVerbände.size===0?'(alle)':`(${selectedVerbände.size} ausgewählt)`;
+  render();
+}
+
+// Datum
+function parseDat(s){const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):null}
+function fmtDate(d){if(!d)return{d:'?',m:'?',y:''};const mn=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];return{d:String(d.getDate()).padStart(2,'0'),m:mn[d.getMonth()],y:d.getFullYear()}}
+function inSelectedMonths(t){
+  if(selectedMonate.size===0) return true;
+  const d=parseDat(t.datum);if(!d) return true;
+  const em=t.datum.match(/- (\d{2})\.(\d{2})\.(\d{4})/);
+  let dE=d;if(em)dE=new Date(+em[3],+em[2]-1,+em[1]);
+  for(const mo of selectedMonate){
+    const [yr,m]=mo.split('-').map(Number);
+    const mS=new Date(yr,m-1,1),mE=new Date(yr,m,0);
+    if(!(dE<mS||d>mE)) return true;
+  }
+  return false;
+}
+function matchAK(t){
+  if(selectedAKs.size===0) return true;
+  const hay=((t.altersklasse||'')+' '+(t.name||'')).toLowerCase();
+  for(const ak of selectedAKs){
+    if(ak==='nachwuchs'&&(hay.includes('nachwuchs')||hay.includes('jugend')||hay.includes('mini'))) return true;
+    if(ak==='herren'&&(hay.includes('herren')||hay.includes('damen'))) return true;
+    if(ak==='senioren'&&hay.includes('senior')) return true;
+    if(['11','13','15','19'].includes(ak)&&hay.includes(ak)) return true;
+  }
+  return false;
+}
+function getAKClass(ak){
+  const h=(ak||'').toLowerCase();
+  if(h.includes('11')) return 'bak-u11';
+  if(h.includes('13')) return 'bak-u13';
+  if(h.includes('15')) return 'bak-u15';
+  if(h.includes('19')) return 'bak-u19';
+  return 'bak';
+}
+
+// Karte
+function initMap(){
+  if(leafletMap) return;
+  leafletMap=L.map('map').setView([51.2,10.4],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18
+  }).addTo(leafletMap);
+  // Legende
+  const leg=L.control({position:'bottomright'});
+  leg.onAdd=()=>{
+    const d=L.DomUtil.create('div');
+    d.style.cssText='background:#fff;padding:8px 12px;border-radius:8px;font-size:12px;border:0.5px solid #ddd;line-height:1.8';
+    d.innerHTML=`<b style="display:block;margin-bottom:4px">Legende</b>
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1D9E75;margin-right:5px"></span>Freie Meldung<br>
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E24B4A;margin-right:5px"></span>Geschlossen`;
+    return d;
+  };
+  leg.addTo(leafletMap);
+}
+
+function renderMap(turniere){
+  if(!leafletMap) return;
+  mapMarkers.forEach(m=>leafletMap.removeLayer(m));
+  mapMarkers=[];
+  turniere.forEach((t,idx)=>{
+    const geo=getCoords(t.ort);
+    if(!geo) return;
+    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const col=isOffen?'#1D9E75':'#E24B4A';
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="width:14px;height:14px;border-radius:50%;background:${col};border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,0.25)"></div>`,
+      iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-10]
+    });
+    const dt=fmtDate(parseDat(t.datum));
+    const vb=VERBÄNDE.find(v=>v.k===t.k);
+    const link=t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'';
+    const m=L.marker([geo.lat,geo.lng],{icon})
+      .bindPopup(`<div style="font-family:system-ui,sans-serif;min-width:200px">
+        <div style="font-weight:600;font-size:13px;margin-bottom:4px;line-height:1.3">${t.name}</div>
+        <div style="font-size:12px;color:#666;margin-bottom:6px">${dt.d}. ${dt.m} ${dt.y} · ${t.ort}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+          <span style="background:${isOffen?'#EAF3DE':'#FCEBEB'};color:${isOffen?'#27500A':'#791F1F'};padding:2px 8px;border-radius:99px;font-size:11px">${isOffen?'Freie Meldung':'Geschlossen'}</span>
+          ${t.altersklasse?`<span style="background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:99px;font-size:11px">${t.altersklasse}</span>`:''}
+        </div>
+        ${link?`<a href="${link}" target="_blank" style="font-size:12px;color:#185FA5">Details auf click-TT →</a>`:''}
+      </div>`)
+      .on('click',()=>highlightCard(idx));
+    m.addTo(leafletMap);
+    mapMarkers.push(m);
+  });
+}
+
+function highlightCard(idx){
+  document.querySelectorAll('.tcard').forEach(c=>c.classList.remove('highlighted'));
+  const cards=document.querySelectorAll('.tcard');
+  if(cards[idx]){
+    cards[idx].classList.add('highlighted');
+    cards[idx].scrollIntoView({behavior:'smooth',block:'center'});
+  }
+}
+
+// Render
+function render(){
+  const txt=document.getElementById('f-text').value.toLowerCase();
+  let fil=allT.filter(t=>{
+    if(selectedVerbände.size>0&&!selectedVerbände.has(t.k)) return false;
+    if(!matchAK(t)) return false;
+    if(txt&&!((t.name||'').toLowerCase().includes(txt)||(t.ort||'').toLowerCase().includes(txt)||(t.verband||'').toLowerCase().includes(txt))) return false;
+    if(!inSelectedMonths(t)) return false;
+    return true;
+  });
+  fil.sort((a,b)=>{const da=parseDat(a.datum),db=parseDat(b.datum);if(!da&&!db)return 0;if(!da)return 1;if(!db)return -1;return da-db});
+  currentFiltered=fil;
+
+  const jugend=fil.filter(t=>/jugend|nachwuchs|11|13|15|mini/.test(((t.altersklasse||'')+(t.name||'')).toLowerCase()));
+  const offen=fil.filter(t=>!(t.offenFor||'').toLowerCase().includes('keine'));
+
+  const sb=document.getElementById('sumbar');
+  if(allT.length>SEED.length||fil.length>0){
+    sb.style.display='grid';
+    document.getElementById('s-tot').textContent=fil.length;
+    document.getElementById('s-sub').textContent=`von ${allT.length} insgesamt`;
+    document.getElementById('s-jug').textContent=jugend.length;
+    document.getElementById('s-op').textContent=offen.length;
+  }
+
+  initMap();
+  renderMap(fil);
+
+  document.getElementById('status').textContent=fil.length>0
+    ?`${fil.length} Turnier${fil.length===1?'':'e'} gefunden`
+    :allT.length>SEED.length?'Keine Turniere für diese Auswahl.':'Filter setzen und "Alle Verbände laden" klicken.';
+
+  const el=document.getElementById('results');
+  if(fil.length===0){el.innerHTML=`<div class="empty">🏓 Keine Turniere für diese Auswahl.</div>`;return;}
+  el.innerHTML=fil.map((t,idx)=>{
+    const vb=VERBÄNDE.find(v=>v.k===t.k);
+    const link=t.link||(t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'');
+    const dt=fmtDate(parseDat(t.datum));
+    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const hasGeo=!!getCoords(t.ort);
+    const inner=`
+      <div class="datebox"><div class="dday">${dt.d}</div><div class="drest">${dt.m} ${dt.y}</div></div>
+      <div>
+        <div class="tname">${t.name}</div>
+        <div class="badges">
+          <span class="badge bv">${t.verband||'Extern'}</span>
+          ${t.ort?`<span class="badge bo">${t.ort}</span>`:''}
+          ${t.altersklasse?`<span class="badge ${getAKClass(t.altersklasse)}">${t.altersklasse}</span>`:''}
+          <span class="badge ${isOffen?'bopen':'bclosed'}">${isOffen?'Freie Meldung':'Keine freie Meldung'}</span>
+        </div>
+      </div>
+      <div class="tarrow">${link?'→':''}</div>`;
+    const cardEl=link
+      ?`<a class="tcard" href="${link}" target="_blank" onclick="highlightCard(${idx})">${inner}</a>`
+      :`<div class="tcard" onclick="highlightCard(${idx})">${inner}</div>`;
+    return cardEl;
+  }).join('');
+}
+
+// Fetch
+async function fetchVerband(v,monat,dot){
+  const url=`${v.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendar?federation=${v.fed}&date=${monat}-01`;
+  try{
+    if(!useProxy) return [];
+    const r=await fetch(PROXY_BASE+'/fetch?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(12000)});
+    const j=await r.json();
+    const t=(j.tournaments||[]).map(t=>({...t,verband:v.name,k:v.k}));
+    dot.style.background=t.length>0?'var(--teal)':'var(--text3)';
+    return t;
+  }catch{
+    dot.style.background='var(--text3)';
+    return [];
+  }
+}
+
+async function startFetch(){
+  const btn=document.getElementById('btn');
+  const spin=document.getElementById('spin');
+  const monat=selectedMonate.size>0?[...selectedMonate][0]:'2026-05';
+  btn.disabled=true;spin.style.display='block';
+  document.getElementById('btn-lbl').textContent='Lädt…';
+  allT=[...SEED];
+
+  // Dots erzeugen
+  let dotsEl=document.getElementById('dots-el');
+  if(!dotsEl){
+    dotsEl=document.createElement('div');
+    dotsEl.id='dots-el';
+    dotsEl.style.cssText='display:flex;gap:4px;flex-wrap:wrap;margin-bottom:0.5rem';
+    document.getElementById('status').before(dotsEl);
+  }
+  dotsEl.style.display='flex';
+  dotsEl.innerHTML=VERBÄNDE.map((_,i)=>`<div style="width:8px;height:8px;border-radius:50%;background:var(--border);transition:background 0.2s" id="dot-${i}"></div>`).join('');
+
+  for(let i=0;i<VERBÄNDE.length;i++){
+    const dot=document.getElementById(`dot-${i}`);
+    dot.style.background='var(--red)';
+    document.getElementById('status').textContent=`${VERBÄNDE[i].name} (${i+1}/${VERBÄNDE.length})…`;
+    const neu=await fetchVerband(VERBÄNDE[i],monat,dot);
+    neu.forEach(t=>{if(!allT.find(x=>x.name===t.name&&x.datum===t.datum))allT.push(t)});
+    render();
+    await new Promise(r=>setTimeout(r,100));
+  }
+
+  btn.disabled=false;spin.style.display='none';
+  document.getElementById('btn-lbl').textContent='Neu laden';
+  document.getElementById('status').textContent=`${allT.length} Turniere geladen.`;
+  setTimeout(()=>{if(dotsEl)dotsEl.style.display='none'},2000);
+}
+
+buildTabs();
+checkProxy();
+document.getElementById('ak-count').textContent='(2 ausgewählt)';
+document.getElementById('mo-count').textContent='(1 ausgewählt)';
+document.getElementById('vb-count').textContent='(alle)';
+render();
+document.getElementById('f-text').addEventListener('input',render);
+</script>
+</body>
+</html>
