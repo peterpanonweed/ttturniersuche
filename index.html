@@ -391,14 +391,17 @@ async function checkProxy(){
 function toggleAK(chip){
   const ak=chip.dataset.ak;
   if(ak===''){
+    // "Alle" klicken: nur Alle-Chip rot, alle anderen grau
     selectedAKs.clear();
-    document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
+    document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.remove('sel'));
+    chip.classList.add('sel');
   } else {
+    // Einzelchip: Alle-Chip immer grau
     document.getElementById('chip-all-ak').classList.remove('sel');
-    document.querySelectorAll('#ak-picker .chip').forEach(c=>{if(c.dataset.ak==='')c.classList.remove('sel')});
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedAKs.add(ak);
     else selectedAKs.delete(ak);
+    // KEIN automatisches Aktivieren von Alle!
   }
   document.getElementById('ak-count').textContent=selectedAKs.size===0?'(alle)':`(${selectedAKs.size} ausgewählt)`;
   render();
@@ -409,15 +412,16 @@ function toggleMo(chip){
   const mo=chip.dataset.mo;
   if(mo===''){
     selectedMonate.clear();
-    document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.add('sel'));
+    document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.remove('sel'));
+    chip.classList.add('sel');
   } else {
     document.getElementById('chip-all-mo').classList.remove('sel');
-    document.querySelectorAll('#mo-picker .chip').forEach(c=>{if(c.dataset.mo==='')c.classList.remove('sel')});
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedMonate.add(mo);
     else selectedMonate.delete(mo);
+    // KEIN automatisches Aktivieren von Alle!
   }
-  document.getElementById('mo-count').textContent=selectedMonate.size===0?'(alle)':`(${selectedMonate.size} ausgewählt)`;
+  document.getElementById('mo-count').textContent=selectedMonate.size===0?'(keine)':`(${selectedMonate.size} ausgewählt)`;
   render();
 }
 
