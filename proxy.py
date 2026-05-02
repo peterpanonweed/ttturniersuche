@@ -101,18 +101,19 @@ def websearch():
     q = request.args.get("q", "").strip()
     if not q:
         return jsonify({"error": "Kein Suchbegriff"}), 400
-    
-    api_key = "AIzaSyBEN4oVn8faHbAAxB-3_lf5BGCL5CvpCYw"
-    cx = "a73d0148af8b3477a"
-    
+
+    serp_api_key = "726cbd759b2391d0e853fef58916b867dae406321cad64378119939d21aa31ef"
+
     try:
-        url = f"https://www.googleapis.com/customsearch/v1?key={api_key}&cx={cx}&q={requests.utils.quote(q)}&num=10&lr=lang_de"
+        url = f"https://serpapi.com/search.json?q={requests.utils.quote(q)}&api_key={serp_api_key}&hl=de&gl=de&num=10"
         resp = requests.get(url, timeout=10)
         data = resp.json()
-        if "items" not in data:
+
+        if "organic_results" not in data:
             return jsonify({"results": [], "query": q})
+
         results = []
-        for item in data["items"]:
+        for item in data["organic_results"]:
             results.append({
                 "name": item.get("title", ""),
                 "link": item.get("link", ""),
@@ -131,7 +132,7 @@ def websearch():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "service": "TT-Turniersuche Proxy v1.1"})
+    return jsonify({"status": "ok", "service": "TT-Turniersuche Proxy"})
 
 
 if __name__ == "__main__":
