@@ -37,50 +37,39 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5;position:relative;overflow-x:hidden}
 
-/* Hintergrund-Grafik */
 .bg-art{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
 .bg-art svg{width:100%;height:100%}
 .shell{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem}
 
-/* Header */
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
 .hdr-txt h1{font-size:22px;font-weight:600}
 .hdr-txt p{font-size:13px;color:var(--text2);margin-top:1px}
 
-/* Proxy bar */
 .proxy-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);margin-bottom:1rem;padding:6px 10px;border-radius:var(--r);background:var(--bg2);border:0.5px solid var(--border)}
 .proxy-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
 .proxy-dot.ok{background:var(--teal)}
 .proxy-dot.err{background:var(--red)}
 
-/* Filter card */
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:0.75rem}
 .section-label{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text2);font-weight:500;margin-bottom:6px}
 
-/* Chips universal */
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .chip{font-size:12px;padding:5px 11px;border-radius:99px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;user-select:none;transition:all 0.12s}
 .chip:hover{color:var(--text);border-color:var(--border2)}
 .chip.sel{background:var(--red);color:#fff;border-color:var(--red)}
 .chip-hint{font-size:11px;color:var(--text3);margin-top:4px}
 
-/* Divider */
 .divider{height:0.5px;background:var(--border);margin:1rem 0}
 
-/* Verbände + Button Zeile */
-.verbands-row{display:flex;align-items:flex-start;gap:12px}
-.verbands-chips{flex:1}
-.load-btn{display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:38px;background:var(--red);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s;white-space:nowrap;flex-shrink:0;margin-top:0}
+.load-btn{display:inline-flex;align-items:center;gap:8px;padding:0 20px;height:38px;background:var(--red);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:500;cursor:pointer;transition:opacity 0.15s;white-space:nowrap;flex-shrink:0}
 .load-btn:hover{opacity:0.87}
 .load-btn:disabled{opacity:0.38;cursor:default}
 .spin{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin .65s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Stichwort */
 input[type=text]{font-size:14px;padding:7px 12px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);outline:none;height:36px;width:100%}
 input:focus{border-color:var(--red)}
 
-/* Summary */
 .sumbar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0.75rem}
 .scard{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:0.75rem 1rem}
 .scard .num{font-size:24px;font-weight:600;line-height:1}
@@ -89,17 +78,13 @@ input:focus{border-color:var(--red)}
 .scard.c-red{border-left:3px solid var(--red)}
 .scard.c-teal{border-left:3px solid var(--teal)}
 
-/* Status */
 .status-row{font-size:13px;color:var(--text2);margin-bottom:0.6rem;min-height:18px;display:flex;align-items:center;gap:8px}
 
-/* Split view */
 .split{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
 @media(max-width:700px){.split{grid-template-columns:1fr}}
 
-/* Karte */
 #map{width:100%;height:600px;border-radius:var(--rl);border:0.5px solid var(--border);position:sticky;top:1rem}
 
-/* Liste */
 .tlist{display:flex;flex-direction:column;gap:7px}
 .tcard{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:0.85rem 1rem;display:grid;grid-template-columns:60px 1fr auto;gap:10px;align-items:center;text-decoration:none;color:inherit;transition:border-color 0.13s;cursor:pointer}
 .tcard:hover{border-color:var(--border2)}
@@ -124,59 +109,46 @@ input:focus{border-color:var(--red)}
 .tarrow{font-size:14px;color:var(--text3)}
 .empty{text-align:center;padding:2rem 1rem;color:var(--text2);font-size:14px}
 
+/* Web-Suche Button */
+.web-btn{display:inline-flex;align-items:center;gap:10px;padding:0 24px;height:44px;background:var(--bg);color:var(--text);border:1.5px solid var(--border2);border-radius:var(--r);font-size:15px;font-weight:500;cursor:pointer;transition:all 0.15s}
+.web-btn:hover{border-color:var(--red);color:var(--red)}
+.web-btn:disabled{opacity:0.38;cursor:default}
+
 footer{margin-top:2rem;text-align:center;font-size:12px;color:var(--text3)}
 footer a{color:var(--text2)}
 </style>
 </head>
 <body>
 
-<!-- Hintergrund Kunst -->
 <div class="bg-art">
 <svg viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-  <!-- Tischtennis-Tisch Andeutung -->
   <rect x="200" y="600" width="500" height="8" rx="4" fill="rgba(30,100,180,0.06)"/>
   <line x1="450" y1="560" x2="450" y2="640" stroke="rgba(30,100,180,0.08)" stroke-width="2"/>
   <rect x="900" y="550" width="420" height="7" rx="3" fill="rgba(30,100,180,0.05)"/>
   <line x1="1110" y1="515" x2="1110" y2="590" stroke="rgba(30,100,180,0.07)" stroke-width="2"/>
-
-  <!-- Spieler links — aufschlagend -->
   <g transform="translate(80, 380)" opacity="0.07">
-    <!-- Körper -->
     <ellipse cx="40" cy="120" rx="18" ry="35" fill="#E24B4A"/>
-    <!-- Kopf -->
     <circle cx="40" cy="72" r="18" fill="#c8956c"/>
-    <!-- Arm mit Schläger -->
     <line x1="52" y1="100" x2="95" y2="70" stroke="#c8956c" stroke-width="5" stroke-linecap="round"/>
-    <!-- Schläger -->
     <ellipse cx="105" cy="62" rx="16" ry="12" fill="#E24B4A" transform="rotate(-20 105 62)"/>
     <rect x="115" y="68" width="4" height="18" rx="2" fill="#7a4a2a" transform="rotate(-20 115 68)"/>
-    <!-- Beine -->
     <line x1="32" y1="150" x2="18" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
     <line x1="48" y1="150" x2="62" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
   </g>
-
-  <!-- Spieler rechts — zurückschlagend -->
   <g transform="translate(1220, 350)" opacity="0.07">
     <ellipse cx="40" cy="120" rx="18" ry="35" fill="#185FA5"/>
     <circle cx="40" cy="72" r="18" fill="#c8956c"/>
-    <!-- Arm mit Schläger rückhand -->
     <line x1="28" y1="100" x2="-15" y2="75" stroke="#c8956c" stroke-width="5" stroke-linecap="round"/>
     <ellipse cx="-25" cy="67" rx="16" ry="12" fill="#185FA5" transform="rotate(15 -25 67)"/>
     <rect x="-38" y="73" width="4" height="18" rx="2" fill="#7a4a2a" transform="rotate(15 -38 73)"/>
     <line x1="32" y1="150" x2="18" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
     <line x1="48" y1="150" x2="62" y2="200" stroke="#1a3a6e" stroke-width="6" stroke-linecap="round"/>
   </g>
-
-  <!-- Ball in der Luft -->
   <circle cx="700" cy="200" r="14" fill="rgba(255,255,255,0.12)" stroke="rgba(226,75,74,0.15)" stroke-width="2"/>
   <circle cx="520" cy="320" r="10" fill="rgba(255,255,255,0.07)" stroke="rgba(226,75,74,0.1)" stroke-width="1.5"/>
   <circle cx="880" cy="280" r="8" fill="rgba(255,255,255,0.06)" stroke="rgba(226,75,74,0.08)" stroke-width="1"/>
-
-  <!-- Hallenboden-Linien -->
   <line x1="0" y1="820" x2="1400" y2="820" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
   <line x1="0" y1="780" x2="1400" y2="780" stroke="rgba(0,0,0,0.02)" stroke-width="1"/>
-
-  <!-- Dekorative Kreise -->
   <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(226,75,74,0.05)" stroke-width="1"/>
   <circle cx="1300" cy="800" r="120" fill="none" stroke="rgba(24,95,165,0.05)" stroke-width="1"/>
   <circle cx="700" cy="450" r="200" fill="none" stroke="rgba(29,158,117,0.04)" stroke-width="1"/>
@@ -208,32 +180,21 @@ footer a{color:var(--text2)}
   <!-- Turnierklasse -->
   <div class="section-label">Turnierklasse <span id="ak-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
   <div class="chips" id="ak-picker">
-    <div class="chip sel" data-ak="11" onclick="toggleAK(this)">Jungen/Mädchen 11</div>
-    <div class="chip sel" data-ak="13" onclick="toggleAK(this)">Jugend 13</div>
+    <div class="chip" data-ak="11" onclick="toggleAK(this)">Jungen/Mädchen 11</div>
+    <div class="chip" data-ak="13" onclick="toggleAK(this)">Jugend 13</div>
     <div class="chip" data-ak="15" onclick="toggleAK(this)">Jugend 15</div>
     <div class="chip" data-ak="19" onclick="toggleAK(this)">Jugend 19</div>
     <div class="chip" data-ak="nachwuchs" onclick="toggleAK(this)">Nachwuchs allg.</div>
     <div class="chip" data-ak="herren" onclick="toggleAK(this)">Damen/Herren</div>
     <div class="chip" data-ak="senioren" onclick="toggleAK(this)">Senioren</div>
-    <div class="chip" data-ak="extern" onclick="toggleAK(this)" style="border-color:var(--purple-d);color:var(--purple-d)">⊕ Verbandsfreie Turniere</div>
-    <div class="chip" data-ak="" onclick="toggleAK(this)" id="chip-all-ak">Alle</div>
+    <div class="chip sel" data-ak="" onclick="toggleAK(this)" id="chip-all-ak">Alle</div>
   </div>
 
   <div class="divider"></div>
 
   <!-- Monate -->
   <div class="section-label">Monate <span id="mo-count" style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
-  <div class="chips" id="mo-picker">
-    <div class="chip sel" data-mo="2026-05" onclick="toggleMo(this)">Mai 26</div>
-    <div class="chip" data-mo="2026-06" onclick="toggleMo(this)">Jun 26</div>
-    <div class="chip" data-mo="2026-07" onclick="toggleMo(this)">Jul 26</div>
-    <div class="chip" data-mo="2026-08" onclick="toggleMo(this)">Aug 26</div>
-    <div class="chip" data-mo="2026-09" onclick="toggleMo(this)">Sep 26</div>
-    <div class="chip" data-mo="2026-10" onclick="toggleMo(this)">Okt 26</div>
-    <div class="chip" data-mo="2026-11" onclick="toggleMo(this)">Nov 26</div>
-    <div class="chip" data-mo="2026-12" onclick="toggleMo(this)">Dez 26</div>
-    <div class="chip" data-mo="" onclick="toggleMo(this)" id="chip-all-mo">Alle</div>
-  </div>
+  <div class="chips" id="mo-picker"></div>
 
   <div class="divider"></div>
 
@@ -250,7 +211,7 @@ footer a{color:var(--text2)}
   <div style="margin-top:1rem">
     <button class="load-btn" id="btn" onclick="startFetch()">
       <div class="spin" id="spin"></div>
-      <span id="btn-lbl">Suchen!</span>
+      <span id="btn-lbl">Neu suchen!</span>
     </button>
   </div>
 </div>
@@ -274,16 +235,17 @@ footer a{color:var(--text2)}
   </div>
 </div>
 
-<div id="web-bar" style="display:none;margin-bottom:0.75rem">
-  <button onclick="searchWeb()" id="btn-web" style="display:inline-flex;align-items:center;gap:8px;padding:0 18px;height:36px;background:transparent;color:var(--text2);border:0.5px solid var(--border2);border-radius:var(--r);font-size:14px;cursor:pointer">
-    <div class="spin" id="spin-web" style="border-top-color:var(--text2);border-color:var(--border2)"></div>
-    ⊕ Freie Turniere aus dem Web suchen
+<!-- Web-Suche — immer sichtbar -->
+<div style="margin-bottom:0.75rem">
+  <button onclick="searchWeb()" id="btn-web" class="web-btn" style="font-size:16px;height:48px;padding:0 28px">
+    <div class="spin" id="spin-web" style="border-top-color:var(--text);border-color:var(--border2)"></div>
+    ⊕ Stattdessen freie Turniere im Web suchen
   </button>
+  <div style="font-size:12px;color:var(--text3);margin-top:5px">Zusatzfunktion für Hobbyspieler &amp; Vereinsfeste · Externe Quellen · Qualität variiert</div>
 </div>
 
-<div class="status-row" id="status">Wähle Filter und klicke "Alle Verbände laden".</div>
+<div class="status-row" id="status">Wähle Filter und klicke "Neu suchen!".</div>
 
-<!-- Split: Liste links, Karte rechts -->
 <div class="split">
   <div class="tlist" id="results"></div>
   <div id="map"></div>
@@ -293,7 +255,7 @@ footer a{color:var(--text2)}
   <p style="font-size:13px;color:var(--text2);max-width:600px;margin:0 auto 1rem;line-height:1.7;font-style:italic">
     Diese Seite ist ein privates Hobbyprojekt — entwickelt von einem Tischtennisvater, weil so eine Übersicht einfach gefehlt hat. Keine Verbindung zum DTTB oder einem Landesverband. Alle Daten kommen direkt von den offiziellen click-TT Seiten der Verbände. Feedback willkommen, Kritik auch — aber bitte nett. 🏓
   </p>
-  Datenquellen: <a href="https://dttb.click-tt.de" target="_blank">click-TT / DTTB</a> · alle 18 Landesverbände · kein offizielles Produkt des DTTB · v0.5
+  Datenquellen: <a href="https://dttb.click-tt.de" target="_blank">click-TT / DTTB</a> · alle 18 Landesverbände · kein offizielles Produkt des DTTB · v1.5
   <p style="margin-top:0.75rem;font-size:11px;color:var(--text3);max-width:600px;margin-left:auto;margin-right:auto">
     Tischtennis Turniere Deutschland · Tischtennisturnier Suche · Tischtennis Turnierkalender ·
     Jugend Tischtennis U11 U13 U15 U19 · Nachwuchs Tischtennis · Offene Tischtennisturniere · DTTB · click-TT
@@ -345,27 +307,74 @@ const GEO = {
   'Harburg':{lat:53.461,lng:9.984},'Niederrhein':{lat:51.5,lng:6.8},
 };
 
+// Geo-Cache: erst GEO-Tabelle, dann Nominatim
+const geoCache = {...GEO};
+
 function getCoords(ort){
   if(!ort) return null;
-  for(const [k,v] of Object.entries(GEO)){
+  for(const [k,v] of Object.entries(geoCache)){
     if(ort.toLowerCase().includes(k.toLowerCase())) return v;
   }
   return null;
 }
 
-const SEED = [
-  {datum:'09.05.2026 - 10.05.2026',name:'3. Kladow Cup',ort:'Berlin',offenFor:'ITTF',altersklasse:'Nachwuchs / Damen/Herren',verband:'Berlin',k:'BTTV',id:'775100'},
-  {datum:'15.05.2026 - 17.05.2026',name:'Talent-Cup Jugend 11 (DTTB)',ort:'Saalfeld-Rudolstadt',offenFor:'keine freie Meldung',altersklasse:'Jugend 11',verband:'DTTB (Bund)',k:'DTTB',id:'767840'},
-  {datum:'04.06.2026 - 07.06.2026',name:'TT-Finals Erfurt 2026',ort:'Erfurt',offenFor:'Deutschland',altersklasse:'Jugend 15 / Jugend 19 / Damen/Herren',verband:'DTTB (Bund)',k:'DTTB',id:''},
-  {datum:'01.08.2026 - 31.08.2026',name:'andro Kids Open (Borussia Düsseldorf)',ort:'Düsseldorf',offenFor:'ITTF',altersklasse:'Nachwuchs Jugend 11 bis Jugend 19',verband:'Westdeutschland',k:'WTTV',id:''},
-  {datum:'01.09.2026 - 28.02.2027',name:'mini-Meisterschaften 2026/27',ort:'Bundesweit',offenFor:'Deutschland',altersklasse:'Jugend 11 / Jugend 13',verband:'DTTB (Bund)',k:'DTTB',id:''},
-  {datum:'01.05.2026 - 01.09.2026',name:'myTT Sommer-Team-Cup',ort:'Niederrhein',offenFor:'Deutschland',altersklasse:'Damen/Herren',verband:'DTTB (Bund)',k:'DTTB',id:'729480'},
-];
+async function getCoordsAsync(ort){
+  if(!ort) return null;
+  const hit = getCoords(ort);
+  if(hit) return hit;
+  // Nominatim anfragen
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ort+', Deutschland')}&format=json&limit=1`;
+    const r=await fetch(url,{headers:{'Accept-Language':'de'}});
+    const j=await r.json();
+    if(j&&j[0]){
+      const coords={lat:parseFloat(j[0].lat),lng:parseFloat(j[0].lon)};
+      geoCache[ort]=coords;
+      return coords;
+    }
+  }catch{}
+  return null;
+}
 
-let allT = [...SEED];
-let selectedAKs = new Set(['11','13']);
-let selectedMonate = new Set(['2026-05']);
-let selectedVerbände = new Set();
+async function renderMapAsync(turniere){
+  if(!leafletMap) return;
+  mapMarkers.forEach(m=>leafletMap.removeLayer(m));
+  mapMarkers=[];
+  for(let idx=0;idx<turniere.length;idx++){
+    const t=turniere[idx];
+    const geo=await getCoordsAsync(t.ort);
+    if(!geo) continue;
+    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const col=isOffen?'#1D9E75':'#E24B4A';
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="width:14px;height:14px;border-radius:50%;background:${col};border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,0.25)"></div>`,
+      iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-10]
+    });
+    const dt=fmtDate(parseDat(t.datum));
+    const vb=VERBÄNDE.find(v=>v.k===t.k);
+    const link=t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'';
+    const m=L.marker([geo.lat,geo.lng],{icon})
+      .bindPopup(`<div style="font-family:system-ui,sans-serif;min-width:200px">
+        <div style="font-weight:600;font-size:13px;margin-bottom:4px;line-height:1.3">${t.name}</div>
+        <div style="font-size:12px;color:#666;margin-bottom:6px">${dt.d}. ${dt.m} ${dt.y} · ${t.ort}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+          <span style="background:${isOffen?'#EAF3DE':'#FCEBEB'};color:${isOffen?'#27500A':'#791F1F'};padding:2px 8px;border-radius:99px;font-size:11px">${isOffen?'Freie Meldung':'Geschlossen'}</span>
+          ${t.altersklasse?`<span style="background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:99px;font-size:11px">${t.altersklasse}</span>`:''}
+        </div>
+        ${link?`<a href="${link}" target="_blank" style="font-size:12px;color:#185FA5">Details auf click-TT →</a>`:''}
+      </div>`)
+      .on('click',()=>highlightCard(idx));
+    m.addTo(leafletMap);
+    mapMarkers.push(m);
+  }
+}
+
+
+let allT = [];
+let selectedAKs = new Set();       // leer = alle
+let selectedMonate = new Set();
+let selectedVerbände = new Set();  // leer = alle
 
 // Proxy
 async function checkProxy(){
@@ -381,83 +390,114 @@ async function checkProxy(){
     }
   }catch{
     document.getElementById('pdot').classList.add('err');
-    document.getElementById('pstatus').textContent='Kein Proxy — Seed-Daten aktiv. Starte proxy.py für Live-Daten.';
+    document.getElementById('pstatus').textContent='Kein Proxy — Seed-Daten aktiv.';
     document.getElementById('pmode').textContent='OFFLINE';
     document.getElementById('pmode').style.color='var(--text3)';
   }
 }
 
-// AK Picker
+// AK Picker — Alle togglet an/aus
 function toggleAK(chip){
   const ak=chip.dataset.ak;
   if(ak===''){
-    // "Alle" klicken: nur Alle-Chip rot, alle anderen grau
-    selectedAKs.clear();
-    document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.remove('sel'));
-    chip.classList.add('sel');
+    const alleRot=chip.classList.contains('sel');
+    if(alleRot){
+      // Alle waren rot → alles ausschalten
+      selectedAKs.clear();
+      document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.remove('sel'));
+    } else {
+      // Alle waren grau → alles einschalten
+      selectedAKs.clear();
+      document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
+    }
   } else {
-    // Einzelchip: Alle-Chip immer grau
-    document.getElementById('chip-all-ak').classList.remove('sel');
+    if(selectedAKs.size===0&&document.getElementById('chip-all-ak').classList.contains('sel')){
+      // Von Alle-Zustand: erst alle ausschalten, dann nur diesen
+      document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.remove('sel'));
+    }
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedAKs.add(ak);
     else selectedAKs.delete(ak);
-    // KEIN automatisches Aktivieren von Alle!
+    const einzelChips=[...document.querySelectorAll('#ak-picker .chip[data-ak]:not([data-ak=""])')];
+    const alleAktiv=einzelChips.every(c=>c.classList.contains('sel'));
+    if(alleAktiv){
+      selectedAKs.clear();
+      document.getElementById('chip-all-ak').classList.add('sel');
+    } else {
+      document.getElementById('chip-all-ak').classList.remove('sel');
+    }
   }
   document.getElementById('ak-count').textContent=selectedAKs.size===0?'(alle)':`(${selectedAKs.size} ausgewählt)`;
   render();
 }
 
-// Monate Picker
+// Monate Picker — Alle togglet an/aus
 function toggleMo(chip){
   const mo=chip.dataset.mo;
   if(mo===''){
-    selectedMonate.clear();
-    document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.remove('sel'));
-    chip.classList.add('sel');
+    const alleRot=chip.classList.contains('sel');
+    if(alleRot){
+      selectedMonate.clear();
+      document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.remove('sel'));
+    } else {
+      selectedMonate.clear();
+      document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.add('sel'));
+    }
   } else {
-    document.getElementById('chip-all-mo').classList.remove('sel');
+    if(selectedMonate.size===0&&document.getElementById('chip-all-mo').classList.contains('sel')){
+      document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.remove('sel'));
+    }
     chip.classList.toggle('sel');
     if(chip.classList.contains('sel')) selectedMonate.add(mo);
     else selectedMonate.delete(mo);
-    // KEIN automatisches Aktivieren von Alle!
+    const einzelChips=[...document.querySelectorAll('#mo-picker .chip[data-mo]:not([data-mo=""])')];
+    const alleAktiv=einzelChips.every(c=>c.classList.contains('sel'));
+    if(alleAktiv){
+      selectedMonate.clear();
+      document.getElementById('chip-all-mo').classList.add('sel');
+    } else {
+      document.getElementById('chip-all-mo').classList.remove('sel');
+    }
   }
-  document.getElementById('mo-count').textContent=selectedMonate.size===0?'(keine)':`(${selectedMonate.size} ausgewählt)`;
+  document.getElementById('mo-count').textContent=selectedMonate.size===0?'(alle)':`(${selectedMonate.size} ausgewählt)`;
   render();
 }
 
-// Verbände Picker
+// Verbände Picker — Alle macht wirklich alle rot
 function buildTabs(){
   document.getElementById('vtabs').innerHTML=
-    `<div class="chip" id="vtab-keine" onclick="toggleV('keine',this)">Keine</div>`+
     VERBÄNDE.map(v=>`<div class="chip" id="vtab-${v.k}" onclick="toggleV('${v.k}',this)">${v.name}</div>`).join('')+
-    `<div class="chip sel" id="vtab-alle" onclick="toggleV('alle',this)">Alle</div>`;
+    `<div class="chip" id="vtab-alle" onclick="toggleV('alle',this)">Alle</div>`;
 }
 
-// selectedVerbände: leer = alle, 'KEINE' = nur externe, sonst spezifische Verbände
 function toggleV(k,el){
   if(k==='alle'){
-    selectedVerbände.clear();
-    document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
-    el.classList.add('sel');
-  } else if(k==='keine'){
-    selectedVerbände.clear();
-    selectedVerbände.add('KEINE');
-    document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
-    el.classList.add('sel');
+    const alleRot=el.classList.contains('sel');
+    if(alleRot){
+      selectedVerbände.clear();
+      document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
+    } else {
+      selectedVerbände.clear();
+      document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.add('sel'));
+    }
   } else {
-    document.getElementById('vtab-alle').classList.remove('sel');
-    document.getElementById('vtab-keine').classList.remove('sel');
-    selectedVerbände.delete('KEINE');
+    if(selectedVerbände.size===0&&document.getElementById('vtab-alle').classList.contains('sel')){
+      document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
+    }
     el.classList.toggle('sel');
     if(el.classList.contains('sel')) selectedVerbände.add(k);
     else selectedVerbände.delete(k);
-    if(selectedVerbände.size===0){
+    const einzelChips=[...document.querySelectorAll('#vtabs .chip:not(#vtab-alle)')];
+    const alleAktiv=einzelChips.every(c=>c.classList.contains('sel'));
+    if(alleAktiv){
+      selectedVerbände.clear();
       document.getElementById('vtab-alle').classList.add('sel');
+    } else {
+      document.getElementById('vtab-alle').classList.remove('sel');
     }
   }
   const size=selectedVerbände.size;
-  document.getElementById('vb-count').textContent=
-    size===0?'(alle)':selectedVerbände.has('KEINE')?'(keine)':`(${size} ausgewählt)`;
+  document.getElementById('vb-count').textContent=size===0?'(alle)':`(${size} ausgewählt)`;
   render();
 }
 
@@ -480,7 +520,6 @@ function matchAK(t){
   if(selectedAKs.size===0) return true;
   const hay=((t.altersklasse||'')+' '+(t.name||'')).toLowerCase();
   for(const ak of selectedAKs){
-    if(ak==='extern') return !!t.external;
     if(ak==='nachwuchs'&&(hay.includes('nachwuchs')||hay.includes('jugend')||hay.includes('mini'))) return true;
     if(ak==='herren'&&(hay.includes('herren')||hay.includes('damen'))) return true;
     if(ak==='senioren'&&hay.includes('senior')) return true;
@@ -504,7 +543,6 @@ function initMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18
   }).addTo(leafletMap);
-  // Legende
   const leg=L.control({position:'bottomright'});
   leg.onAdd=()=>{
     const d=L.DomUtil.create('div');
@@ -562,8 +600,9 @@ function highlightCard(idx){
 // Render
 function render(){
   const txt=document.getElementById('f-text').value.toLowerCase();
+  const nurWeb=false;
   let fil=allT.filter(t=>{
-    if(selectedVerbände.has('KEINE')) return !!t.external;
+    if(nurWeb) return !!t.external;
     if(selectedVerbände.size>0&&!selectedVerbände.has(t.k)) return false;
     if(!matchAK(t)) return false;
     if(txt&&!((t.name||'').toLowerCase().includes(txt)||(t.ort||'').toLowerCase().includes(txt)||(t.verband||'').toLowerCase().includes(txt))) return false;
@@ -577,9 +616,8 @@ function render(){
   const offen=fil.filter(t=>!(t.offenFor||'').toLowerCase().includes('keine'));
 
   const sb=document.getElementById('sumbar');
-  if(allT.length>SEED.length||fil.length>0){
+  if(allT.length>0||fil.length>0){
     sb.style.display='grid';
-    document.getElementById('web-bar').style.display='block';
     document.getElementById('s-tot').textContent=fil.length;
     document.getElementById('s-sub').textContent=`von ${allT.length} insgesamt`;
     document.getElementById('s-jug').textContent=jugend.length;
@@ -587,11 +625,11 @@ function render(){
   }
 
   initMap();
-  renderMap(fil);
+  renderMapAsync(fil);
 
   document.getElementById('status').textContent=fil.length>0
     ?`${fil.length} Turnier${fil.length===1?'':'e'} gefunden`
-    :allT.length>SEED.length?'Keine Turniere für diese Auswahl.':'Filter setzen und "Alle Verbände laden" klicken.';
+    :allT.length>0?'Keine Turniere für diese Auswahl.':'Filter setzen und "Neu suchen!" klicken.';
 
   const el=document.getElementById('results');
   if(fil.length===0){el.innerHTML=`<div class="empty">🏓 Keine Turniere für diese Auswahl.</div>`;return;}
@@ -600,7 +638,6 @@ function render(){
     const link=t.link||(t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'');
     const dt=fmtDate(parseDat(t.datum));
     const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
-    const hasGeo=!!getCoords(t.ort);
     const inner=`
       <div class="datebox"><div class="dday">${dt.d}</div><div class="drest">${dt.m} ${dt.y}</div></div>
       <div>
@@ -613,40 +650,132 @@ function render(){
         </div>
       </div>
       <div class="tarrow">${link?'→':''}</div>`;
-    const cardEl=link
-      ?`<a class="tcard" href="${link}" target="_blank" onclick="highlightCard(${idx})">${inner}</a>`
-      :`<div class="tcard" onclick="highlightCard(${idx})">${inner}</div>`;
-    return cardEl;
+    return link
+      ?`<a class="tcard${t.external?' external':''}" href="${link}" target="_blank" onclick="highlightCard(${idx})">${inner}</a>`
+      :`<div class="tcard${t.external?' external':''}" onclick="highlightCard(${idx})">${inner}</div>`;
   }).join('');
 }
 
-// Web-Suche für freie Turniere
+// Web-Modus: komplett unabhängig vom Verbandsfilter
+let webModus = false;
+let webErgebnisse = [];
+
+function aktiviereWebModus(){
+  webModus = true;
+  // Alle Filter visuell ausschalten
+  document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#mo-picker .chip').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('ak-count').textContent='(pausiert)';
+  document.getElementById('mo-count').textContent='(pausiert)';
+  document.getElementById('vb-count').textContent='(pausiert)';
+  // Filter-Card optisch dimmen
+  document.querySelector('.card').style.opacity='0.4';
+  document.querySelector('.card').style.pointerEvents='none';
+  // Button umbenennen
+  document.getElementById('btn-web').querySelector('span')||
+    (document.getElementById('btn-web').lastChild.textContent=' Zurück zur Verbandssuche');
+}
+
+function deaktiviereWebModus(){
+  webModus = false;
+  webErgebnisse = [];
+  document.querySelector('.card').style.opacity='';
+  document.querySelector('.card').style.pointerEvents='';
+  // Filter-Counts wiederherstellen
+  document.getElementById('ak-count').textContent=selectedAKs.size===0?'(alle)':`(${selectedAKs.size} ausgewählt)`;
+  document.getElementById('mo-count').textContent=selectedMonate.size===0?'(alle)':`(${selectedMonate.size} ausgewählt)`;
+  document.getElementById('vb-count').textContent=selectedVerbände.size===0?'(alle)':`(${selectedVerbände.size} ausgewählt)`;
+  // Startzustand Chips wiederherstellen
+  buildStartzustand();
+  render();
+}
+
+function buildStartzustand(){
+  // AK: alle rot
+  selectedAKs.clear();
+  document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
+  // Monate: nächste 3
+  document.querySelectorAll('#mo-picker .chip').forEach(c=>{c.classList.remove('sel');});
+  selectedMonate.clear();
+  const moChips=[...document.querySelectorAll('#mo-picker .chip[data-mo]:not([data-mo=""])')];
+  moChips.slice(0,3).forEach(c=>{c.classList.add('sel');selectedMonate.add(c.dataset.mo);});
+  // Verbände: DTTB
+  document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
+  selectedVerbände.clear();
+  const dttb=document.getElementById('vtab-DTTB');
+  if(dttb){dttb.classList.add('sel');selectedVerbände.add('DTTB');}
+}
+
 async function searchWeb(){
+  if(webModus){
+    // Zweiter Klick = zurück zur Verbandssuche
+    deaktiviereWebModus();
+    document.getElementById('btn-web').innerHTML=`<div class="spin" id="spin-web" style="border-top-color:var(--text);border-color:var(--border2)"></div>⊕ Stattdessen freie Turniere im Web suchen`;
+    return;
+  }
+
   const sw=document.getElementById('spin-web');
   const btn=document.getElementById('btn-web');
   sw.style.display='block'; btn.disabled=true;
-  const mo=selectedMonate.size>0?[...selectedMonate][0]:'2026-05';
-  const [yr,m]=mo.split('-');
+
+  const now=new Date();
   const monate=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-  const moName=monate[parseInt(m)-1];
+  const moName=monate[now.getMonth()];
+  const yr=now.getFullYear();
   const q=`Tischtennis Turnier ${moName} ${yr} offen anmelden Deutschland`;
+
   try{
     const r=await fetch(PROXY_BASE+'/websearch?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(15000)});
     const j=await r.json();
     if(j.results&&j.results.length>0){
-      let added=0;
-      j.results.forEach(res=>{
-        if(!allT.find(x=>x.name===res.name)){allT.push({...res,k:'EXT',external:true});added++;}
-      });
-      document.getElementById('status').textContent=`${added} freie Turniere aus dem Web hinzugefügt.`;
+      webErgebnisse=j.results.map(res=>({...res,k:'EXT',external:true}));
+      aktiviereWebModus();
+      // Ergebnisse direkt anzeigen
+      document.getElementById('sumbar').style.display='grid';
+      document.getElementById('s-tot').textContent=webErgebnisse.length;
+      document.getElementById('s-sub').textContent='aus dem Web';
+      document.getElementById('s-jug').textContent='–';
+      document.getElementById('s-op').textContent='–';
+      document.getElementById('status').textContent=`${webErgebnisse.length} freie Turniere aus dem Web gefunden.`;
+      renderListe(webErgebnisse);
+      initMap(); renderMapAsync(webErgebnisse);
+      // Button zu "Zurück"
+      btn.innerHTML=`← Zurück zur Verbandssuche`;
+      btn.style.borderColor='var(--red)';
+      btn.style.color='var(--red)';
     } else {
-      document.getElementById('status').textContent='Keine zusätzlichen freien Turniere gefunden.';
+      document.getElementById('status').textContent='Keine freien Turniere im Web gefunden.';
     }
   }catch{
-    document.getElementById('status').textContent='Web-Suche nicht verfügbar — Proxy nötig.';
+    document.getElementById('status').textContent='Web-Suche nicht verfügbar.';
   }
   sw.style.display='none'; btn.disabled=false;
-  render();
+}
+
+function renderListe(turniere){
+  const el=document.getElementById('results');
+  if(turniere.length===0){el.innerHTML=`<div class="empty">🏓 Keine Ergebnisse.</div>`;return;}
+  el.innerHTML=turniere.map((t,idx)=>{
+    const vb=VERBÄNDE.find(v=>v.k===t.k);
+    const link=t.link||(t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'');
+    const dt=fmtDate(parseDat(t.datum));
+    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const inner=`
+      <div class="datebox"><div class="dday">${dt.d}</div><div class="drest">${dt.m} ${dt.y}</div></div>
+      <div>
+        <div class="tname">${t.name}</div>
+        <div class="badges">
+          <span class="badge bext">${t.verband||'Web'}</span>
+          ${t.snippet?`<span class="badge bo" style="max-width:300px;overflow:hidden;text-overflow:ellipsis">${t.snippet.slice(0,80)}…</span>`:''}
+          <span class="badge bopen">Freie Meldung</span>
+        </div>
+      </div>
+      <div class="tarrow">${link?'→':''}</div>`;
+    return link
+      ?`<a class="tcard external" href="${link}" target="_blank">${inner}</a>`
+      :`<div class="tcard external">${inner}</div>`;
+  }).join('');
 }
 
 // Fetch
@@ -671,9 +800,8 @@ async function startFetch(){
   const monat=selectedMonate.size>0?[...selectedMonate][0]:'2026-05';
   btn.disabled=true;spin.style.display='block';
   document.getElementById('btn-lbl').textContent='Lädt…';
-  allT=[...SEED];
+  allT=[];
 
-  // Dots erzeugen
   let dotsEl=document.getElementById('dots-el');
   if(!dotsEl){
     dotsEl=document.createElement('div');
@@ -700,11 +828,59 @@ async function startFetch(){
   setTimeout(()=>{if(dotsEl)dotsEl.style.display='none'},2000);
 }
 
+// Dynamische Monate: nächste 12 ab heute
+function buildMonate(){
+  const namen=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  const now=new Date();
+  const picker=document.getElementById('mo-picker');
+  picker.innerHTML='';
+  for(let i=0;i<12;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()+i,1);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label=`${namen[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
+    const chip=document.createElement('div');
+    chip.className='chip';
+    chip.dataset.mo=key;
+    chip.textContent=label;
+    chip.onclick=()=>toggleMo(chip);
+    picker.appendChild(chip);
+  }
+  // Alle-Chip
+  const alle=document.createElement('div');
+  alle.className='chip';
+  alle.dataset.mo='';
+  alle.id='chip-all-mo';
+  alle.textContent='Alle';
+  alle.onclick=()=>toggleMo(alle);
+  picker.appendChild(alle);
+}
+
+buildMonate();
 buildTabs();
 checkProxy();
-document.getElementById('ak-count').textContent='(2 ausgewählt)';
-document.getElementById('mo-count').textContent='(1 ausgewählt)';
-document.getElementById('vb-count').textContent='(alle)';
+
+// Startzustand Turnierklasse: Alle rot (alle aktiv)
+selectedAKs.clear();
+document.querySelectorAll('#ak-picker .chip').forEach(c=>c.classList.add('sel'));
+document.getElementById('ak-count').textContent='(alle)';
+
+// Startzustand Monate: nächste 3 Monate
+(()=>{
+  const chips=[...document.querySelectorAll('#mo-picker .chip[data-mo]:not([data-mo=""])')];
+  chips.slice(0,3).forEach(c=>{
+    c.classList.add('sel');
+    selectedMonate.add(c.dataset.mo);
+  });
+  document.getElementById('mo-count').textContent='(3 ausgewählt)';
+})();
+
+// Startzustand Verbände: DTTB ausgewählt
+(()=>{
+  const dttb=document.getElementById('vtab-DTTB');
+  if(dttb){dttb.classList.add('sel');selectedVerbände.add('DTTB');}
+  document.getElementById('vb-count').textContent='(1 ausgewählt)';
+})();
+
 render();
 document.getElementById('f-text').addEventListener('input',render);
 </script>
