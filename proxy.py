@@ -102,7 +102,7 @@ def websearch():
     if not q:
         return jsonify({"error": "Kein Suchbegriff"}), 400
     
-    api_key = "DEIN_GOOGLE_API_KEY_HIER"
+    api_key = "AIzaSyBEN4oVn8faHbAAxB-3_lf5BGCL5CvpCYw"
     cx = "a73d0148af8b3477a"
     
     try:
