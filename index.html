@@ -116,6 +116,29 @@ input:focus{border-color:var(--red)}
 
 footer{margin-top:2rem;text-align:center;font-size:12px;color:var(--text3)}
 footer a{color:var(--text2)}
+
+/* Footer-Rechtslinks */
+.legal-links{margin-top:1rem;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.legal-links a{color:var(--text2);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.legal-links a:hover{color:var(--text)}
+
+/* Kaffeekasse (PayPal) */
+.bmc{display:inline-flex;align-items:center;gap:8px;margin-top:1.25rem;padding:9px 18px;background:#0070BA;color:#fff;border-radius:99px;font-size:13px;font-weight:600;text-decoration:none;transition:transform 0.12s,box-shadow 0.12s;box-shadow:0 2px 8px rgba(0,0,0,0.12)}
+.bmc:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,112,186,0.35);color:#fff;background:#005ea6}
+.bmc svg{flex-shrink:0}
+.bmc-hint{font-size:11px;color:var(--text3);margin-top:6px}
+
+/* Impressum-Modal */
+.modal-ov{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.modal-ov.open{display:flex}
+.modal{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);max-width:560px;width:100%;padding:1.75rem 1.75rem 2rem;position:relative;text-align:left;box-shadow:0 20px 60px rgba(0,0,0,0.3);margin:auto}
+.modal h2{font-size:19px;font-weight:600;margin-bottom:0.25rem;color:var(--text)}
+.modal h3{font-size:13px;font-weight:600;margin-top:1.25rem;margin-bottom:0.35rem;color:var(--text)}
+.modal p{font-size:13px;line-height:1.65;color:var(--text2);margin-bottom:0.25rem}
+.modal a{color:var(--red)}
+.modal .legal-sub{font-size:11px;color:var(--text3);margin-bottom:1rem}
+.modal-close{position:absolute;top:0.9rem;right:1rem;width:30px;height:30px;border:none;background:var(--bg2);border-radius:50%;color:var(--text2);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.13s}
+.modal-close:hover{background:var(--bg3);color:var(--text)}
 </style>
 </head>
 <body>
@@ -256,17 +279,126 @@ footer a{color:var(--text2)}
     Diese Seite ist ein privates Hobbyprojekt — entwickelt von einem Tischtennisvater, weil so eine Übersicht einfach gefehlt hat. Keine Verbindung zum DTTB oder einem Landesverband. Alle Daten kommen direkt von den offiziellen click-TT Seiten der Verbände. Feedback willkommen, Kritik auch — aber bitte nett. 🏓
   </p>
   Datenquellen: <a href="https://dttb.click-tt.de" target="_blank">click-TT / DTTB</a> · alle 18 Landesverbände · kein offizielles Produkt des DTTB · v1.5
+  <div>
+    <a class="bmc" href="https://paypal.me/adamiberlin" target="_blank" rel="noopener">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 8h11a3 3 0 0 1 0 6h-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M3 8h13v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M7 3.5c.6.6.6 1.4 0 2M10.5 3.5c.6.6.6 1.4 0 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      Spendier mir einen Kaffee
+    </a>
+    <div class="bmc-hint">Freiwillige Unterstützung für die Serverkosten · läuft über PayPal</div>
+  </div>
   <p style="margin-top:0.75rem;font-size:11px;color:var(--text3);max-width:600px;margin-left:auto;margin-right:auto">
     Tischtennis Turniere Deutschland · Tischtennisturnier Suche · Tischtennis Turnierkalender ·
     Jugend Tischtennis U11 U13 U15 U19 · Nachwuchs Tischtennis · Offene Tischtennisturniere · DTTB · click-TT
   </p>
+  <div class="legal-links">
+    <a onclick="openImpressum()">Impressum</a>
+    <a onclick="openDatenschutz()">Datenschutzerklärung</a>
+  </div>
 </footer>
+</div>
+
+<!-- Impressum-Modal -->
+<div class="modal-ov" id="impressum-ov" onclick="if(event.target===this)closeImpressum()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="imp-title">
+    <button class="modal-close" onclick="closeImpressum()" aria-label="Schließen">×</button>
+    <h2 id="imp-title">Impressum</h2>
+    <p class="legal-sub">Angaben gemäß § 5 DDG (Digitale-Dienste-Gesetz)</p>
+
+    <p>Adam Nümm<br>
+    Maybachufer 28<br>
+    12047 Berlin</p>
+
+    <h3>Kontakt</h3>
+    <p>E-Mail: <a href="mailto:mail@adamnuemm.de">mail@adamnuemm.de</a></p>
+
+    <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
+    <p>Adam Nümm, Anschrift wie oben</p>
+
+    <h3>Haftung für Inhalte</h3>
+    <p>Diese Seite ist ein privates, nicht-kommerzielles Hobbyprojekt ohne Verbindung zum DTTB oder einem Landesverband. Die angezeigten Turnierdaten werden automatisiert von den offiziellen click-TT Seiten der Verbände bezogen. Für die Richtigkeit, Vollständigkeit und Aktualität dieser fremden Daten wird keine Gewähr übernommen.</p>
+
+    <h3>Haftung für Links</h3>
+    <p>Diese Seite verlinkt auf externe Webseiten Dritter, auf deren Inhalte kein Einfluss besteht. Für diese fremden Inhalte ist stets der jeweilige Anbieter verantwortlich.</p>
+
+    <h3>Urheberrecht</h3>
+    <p>Marken-, Namens- und Bildrechte an „click-TT", „DTTB" sowie den Verbandsdaten liegen bei den jeweiligen Rechteinhabern.</p>
+  </div>
+</div>
+
+<!-- Datenschutz-Modal -->
+<div class="modal-ov" id="datenschutz-ov" onclick="if(event.target===this)closeDatenschutz()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ds-title">
+    <button class="modal-close" onclick="closeDatenschutz()" aria-label="Schließen">×</button>
+    <h2 id="ds-title">Datenschutzerklärung</h2>
+    <p class="legal-sub">Informationen gemäß Art. 13 / 14 DSGVO · Stand: Juni 2026</p>
+
+    <h3>1. Verantwortlicher</h3>
+    <p>Verantwortlich für die Datenverarbeitung auf dieser Website ist:<br>
+    Adam Nümm<br>
+    Maybachufer 28, 12047 Berlin<br>
+    E-Mail: <a href="mailto:mail@adamnuemm.de">mail@adamnuemm.de</a></p>
+
+    <h3>2. Grundsätzliches</h3>
+    <p>Diese Website ist ein privates, nicht-kommerzielles Hobbyprojekt. Es werden keine Cookies gesetzt, keine Nutzerkonten geführt und keine Analyse-, Tracking-, Werbe- oder Social-Media-Dienste eingesetzt. Personenbezogene Daten werden ausschließlich in dem nachfolgend beschriebenen, technisch notwendigen Umfang verarbeitet.</p>
+
+    <h3>3. Bereitstellung der Website &amp; Server-Logfiles</h3>
+    <p>Beim Aufruf der Website erfasst der Hosting-Anbieter automatisch technische Zugriffsdaten, die Ihr Browser übermittelt (insbesondere IP-Adresse, Datum und Uhrzeit, abgerufene Datei, übertragene Datenmenge, Referrer-URL, Browsertyp und Betriebssystem). Dies ist erforderlich, um die Website auszuliefern sowie ihre Stabilität und Sicherheit zu gewährleisten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer technisch fehlerfreien und sicheren Bereitstellung). Die Logfiles werden nach kurzer Zeit gelöscht oder anonymisiert.</p>
+    <p style="color:var(--text3);font-size:12px"><strong>Hosting-Anbieter (bitte ergänzen):</strong> Name und Anschrift des Anbieters, bei dem ttturniersuche.de gehostet wird.</p>
+
+    <h3>4. Eingebundene Dienste Dritter</h3>
+    <p>Zur Darstellung der Karte, zur Zuordnung von Ortsnamen und zum Abruf der Turnierdaten werden Inhalte externer Anbieter geladen. Dabei wird Ihre IP-Adresse technisch zwingend an den jeweiligen Anbieter übermittelt, damit die Inhalte an Ihren Browser ausgeliefert werden können. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer funktionsfähigen, übersichtlichen Darstellung der Turniersuche).</p>
+
+    <p><strong>a) OpenStreetMap (Kartendarstellung)</strong><br>
+    Das Kartenmaterial wird von Servern der OpenStreetMap Foundation, St John's Innovation Centre, Cowley Road, Cambridge, CB4 0WS, Vereinigtes Königreich, geladen. Datenschutzhinweise: <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener">wiki.osmfoundation.org/wiki/Privacy_Policy</a></p>
+
+    <p><strong>b) Nominatim (Geokodierung)</strong><br>
+    Zur Umwandlung von Ortsnamen in Kartenkoordinaten wird der Dienst Nominatim der OpenStreetMap Foundation angefragt. Übermittelt werden dabei Ihre IP-Adresse sowie der jeweils gesuchte Ortsname.</p>
+
+    <p><strong>c) Cloudflare / cdnjs (Programmbibliothek)</strong><br>
+    Die Karten-Bibliothek „Leaflet" wird über das Content-Delivery-Network cdnjs der Cloudflare, Inc., 101 Townsend Street, San Francisco, CA 94107, USA, geladen. Cloudflare ist unter dem EU-U.S. Data Privacy Framework zertifiziert.</p>
+
+    <p><strong>d) Daten-Proxy (Render)</strong><br>
+    Der Abruf der Turnierdaten von den offiziellen click-TT-Seiten der Verbände sowie die optionale Web-Suche erfolgen über einen technischen Vermittlungsserver (Proxy), der bei der Render Services, Inc. (USA) betrieben wird. Dabei werden Ihre IP-Adresse sowie ggf. Ihre Sucheingaben an diesen Server übermittelt. Der Proxy ruft die Daten serverseitig ab; Ihr Browser kontaktiert die Verbandsseiten dadurch nicht unmittelbar.</p>
+
+    <p style="background:var(--amber-l);color:var(--amber-d);padding:10px 12px;border-radius:var(--r);font-size:12px"><strong>Hinweis zur Drittlandübermittlung:</strong> Bei den Diensten unter c) und d) kann eine Übermittlung personenbezogener Daten in die USA erfolgen (Drittland im Sinne der Art. 44 ff. DSGVO). Ein angemessenes Datenschutzniveau wird, soweit einschlägig, über das EU-U.S. Data Privacy Framework bzw. über Standardvertragsklauseln gewährleistet.</p>
+
+    <h3>5. Keine Cookies, kein Tracking</h3>
+    <p>Diese Website verwendet keine Cookies, kein Local Storage zu Tracking-Zwecken und keine Analyse-, Reichweiten- oder Werbedienste. Es findet kein nutzerbezogenes Profiling statt.</p>
+
+    <h3>6. Speicherdauer</h3>
+    <p>Personenbezogene Daten werden nur so lange verarbeitet, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungspflichten dies vorsehen. Anschließend werden sie gelöscht.</p>
+
+    <h3>7. Ihre Rechte</h3>
+    <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie ein Widerspruchsrecht gegen die Verarbeitung (Art. 21 DSGVO). Zur Ausübung genügt eine formlose Nachricht an die oben genannte Kontaktadresse.</p>
+
+    <h3>8. Beschwerderecht bei der Aufsichtsbehörde</h3>
+    <p>Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Für den Verantwortlichen zuständig ist die Berliner Beauftragte für Datenschutz und Informationsfreiheit, Alt-Moabit 59–61, 10555 Berlin.</p>
+
+    <h3>9. SSL-/TLS-Verschlüsselung</h3>
+    <p>Diese Website nutzt aus Sicherheitsgründen eine TLS-Verschlüsselung der Datenübertragung, erkennbar an „https://" in der Adresszeile.</p>
+
+    <h3>10. Aktualität dieser Erklärung</h3>
+    <p>Es gilt die jeweils aktuelle, auf dieser Website veröffentlichte Fassung. Bei Änderungen der Datenverarbeitung wird diese Erklärung angepasst.</p>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const PROXY_BASE = "https://ttturniersuche.onrender.com";
 let useProxy = false;
+
+// Impressum-Modal
+function openImpressum(){document.getElementById('impressum-ov').classList.add('open');document.body.style.overflow='hidden';}
+function closeImpressum(){document.getElementById('impressum-ov').classList.remove('open');document.body.style.overflow='';}
+// Datenschutz-Modal
+function openDatenschutz(){document.getElementById('datenschutz-ov').classList.add('open');document.body.style.overflow='hidden';}
+function closeDatenschutz(){document.getElementById('datenschutz-ov').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeImpressum();closeDatenschutz();}});
+
 let leafletMap = null;
 let currentFiltered = [];
 let mapMarkers = [];
