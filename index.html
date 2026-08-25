@@ -465,7 +465,29 @@ const GEO = {
 };
 
 // Geo-Cache: erst GEO-Tabelle, dann Nominatim
-const geoCache = {...GEO};
+// Geokodierung: Nominatim schonend nutzen.
+// Die OSM-Nutzungsrichtlinie erlaubt hoechstens eine Anfrage pro Sekunde
+// und kein Massen-Geokodieren. Vorher ging pro Turnierort eine ungebremste
+// Anfrage raus — quittiert mit 403 "Access denied", worauf die Pins
+// kommentarlos fehlten. Jetzt: Ergebnisse ueberdauern den Seitenaufruf,
+// die Anfragen laufen einzeln mit Abstand, und ein Ort, den der Dienst
+// nicht kennt, wird kein zweites Mal erfragt.
+const GEO_SPEICHER='ttt-geocache-v1';
+
+function ladeGelernteOrte(){
+  try{ return JSON.parse(localStorage.getItem(GEO_SPEICHER)||'{}'); }
+  catch{ return {}; }
+}
+
+let geoGelernt = ladeGelernteOrte();
+const geoCache = {...GEO, ...geoGelernt};
+const geoUnbekannt = new Set();
+let geoLetzteAnfrage = 0;
+let geoWarteschlange = Promise.resolve();
+
+function sichereGelernteOrte(){
+  try{ localStorage.setItem(GEO_SPEICHER, JSON.stringify(geoGelernt)); }catch{}
+}
 
 function getCoords(ort){
   if(!ort) return null;
@@ -479,27 +501,47 @@ async function getCoordsAsync(ort){
   if(!ort) return null;
   const hit = getCoords(ort);
   if(hit) return hit;
-  // Nominatim anfragen
-  try{
-    const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ort+', Deutschland')}&format=json&limit=1`;
-    const r=await fetch(url,{headers:{'Accept-Language':'de'}});
-    const j=await r.json();
-    if(j&&j[0]){
-      const coords={lat:parseFloat(j[0].lat),lng:parseFloat(j[0].lon)};
-      geoCache[ort]=coords;
-      return coords;
-    }
-  }catch{}
-  return null;
+  if(geoUnbekannt.has(ort)) return null;
+
+  // Alle Anfragen laufen nacheinander durch eine Kette, mit mindestens
+  // 1,1 s Abstand — das haelt uns innerhalb der Richtlinie.
+  geoWarteschlange = geoWarteschlange.then(async()=>{
+    if(getCoords(ort)||geoUnbekannt.has(ort)) return;
+    const wartezeit=Math.max(0, 1100-(Date.now()-geoLetzteAnfrage));
+    if(wartezeit) await new Promise(r=>setTimeout(r,wartezeit));
+    geoLetzteAnfrage=Date.now();
+    try{
+      const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ort+', Deutschland')}&format=json&limit=1`;
+      const r=await fetch(url,{headers:{'Accept-Language':'de'}});
+      if(!r.ok){ geoUnbekannt.add(ort); return; }
+      const j=await r.json();
+      if(j&&j[0]){
+        const coords={lat:parseFloat(j[0].lat),lng:parseFloat(j[0].lon)};
+        geoCache[ort]=coords; geoGelernt[ort]=coords; sichereGelernteOrte();
+      } else {
+        geoUnbekannt.add(ort);
+      }
+    }catch{ geoUnbekannt.add(ort); }
+  });
+  await geoWarteschlange;
+  return getCoords(ort);
 }
+
+// render() ruft das hier ohne await auf, einmal pro fertigem Verband.
+// Ohne Kennung liefen bis zu 18 Durchlaeufe gleichzeitig und haben sich
+// gegenseitig die Marker weggeraeumt. Nur der juengste Lauf zeichnet.
+let mapLauf = 0;
 
 async function renderMapAsync(turniere){
   if(!leafletMap) return;
+  const meinLauf = ++mapLauf;
   mapMarkers.forEach(m=>leafletMap.removeLayer(m));
   mapMarkers=[];
   for(let idx=0;idx<turniere.length;idx++){
+    if(meinLauf!==mapLauf) return;
     const t=turniere[idx];
     const geo=await getCoordsAsync(t.ort);
+    if(meinLauf!==mapLauf) return;
     if(!geo) continue;
     const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
     const col=isOffen?'#1D9E75':'#E24B4A';
