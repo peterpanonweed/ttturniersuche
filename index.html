@@ -13,7 +13,23 @@
 <meta property="og:url" content="https://ttturniersuche.de">
 <link rel="canonical" href="https://ttturniersuche.de">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Tischtennis Turniersuche","description":"Bundesweiter Tischtennis Turnierkalender Deutschland","url":"https://ttturniersuche.de","applicationCategory":"SportsApplication"}</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<meta name="theme-color" content="#E24B4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1c1a" media="(prefers-color-scheme: dark)">
+<meta property="og:site_name" content="Tischtennis Turniersuche">
+<meta property="og:locale" content="de_DE">
+<meta property="og:image" content="https://ttturniersuche.de/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tischtennis Turniersuche — bundesweiter Turnierkalender">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://ttturniersuche.onrender.com">
+<link rel="dns-prefetch" href="https://tile.openstreetmap.org">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+      integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <style>
 :root{
   --red:#E24B4A;--red-l:#FCEBEB;--red-d:#791F1F;
@@ -389,7 +405,9 @@ footer a{color:var(--text2)}
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
+        integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 const PROXY_BASE = "https://ttturniersuche.onrender.com";
 let useProxy = false;
@@ -405,6 +423,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeImpressum();cl
 let leafletMap = null;
 let currentFiltered = [];
 let mapMarkers = [];
+
+// Voreingestellte Verbände beim Seitenaufruf.
+// BTTV = Berlin (Bayern ist BTTV-B), TTVB = Brandenburg.
+const START_VERBÄNDE = ['BTTV','TTVB'];
 
 const VERBÄNDE = [
   {k:'DTTB',  name:'DTTB (Bund)',       base:'https://dttb.click-tt.de', fed:'DTTB'},
@@ -512,23 +534,37 @@ let selectedMonate = new Set();
 let selectedVerbände = new Set();  // leer = alle
 
 // Proxy
+function setProxyState(cls,text,mode,color){
+  const dot=document.getElementById('pdot');
+  dot.classList.remove('ok','err');
+  if(cls)dot.classList.add(cls);
+  document.getElementById('pstatus').textContent=text;
+  document.getElementById('pmode').textContent=mode;
+  document.getElementById('pmode').style.color=color;
+}
+
+// Der Proxy liegt im Render-Free-Tier und schläft nach 15 min ein.
+// Ein Kaltstart dauert gemessen bis zu 35 s — ein 4-Sekunden-Timeout
+// hat die Seite deshalb bei fast jedem Erstaufruf als OFFLINE gezeigt,
+// obwohl der Server nur am Hochfahren war.
 async function checkProxy(){
-  try{
-    const r=await fetch(PROXY_BASE+'/health',{signal:AbortSignal.timeout(4000)});
-    const j=await r.json();
-    if(j.status==='ok'){
-      useProxy=true;
-      document.getElementById('pdot').classList.add('ok');
-      document.getElementById('pstatus').textContent='Proxy aktiv — Live-Daten verfügbar';
-      document.getElementById('pmode').textContent='LIVE';
-      document.getElementById('pmode').style.color='var(--teal)';
+  const versuche=[8000,20000,35000];
+  setProxyState(null,'Server wird geweckt — beim ersten Aufruf dauert das bis zu einer Minute…','STARTET','var(--text2)');
+  for(let i=0;i<versuche.length;i++){
+    try{
+      const r=await fetch(PROXY_BASE+'/health',{signal:AbortSignal.timeout(versuche[i])});
+      const j=await r.json();
+      if(j.status==='ok'){
+        useProxy=true;
+        setProxyState('ok','Proxy aktiv — Live-Daten verfügbar','LIVE','var(--teal)');
+        return;
+      }
+    }catch{}
+    if(i<versuche.length-1){
+      setProxyState(null,`Server wird geweckt — Versuch ${i+2} von ${versuche.length}…`,'STARTET','var(--text2)');
     }
-  }catch{
-    document.getElementById('pdot').classList.add('err');
-    document.getElementById('pstatus').textContent='Kein Proxy — Seed-Daten aktiv.';
-    document.getElementById('pmode').textContent='OFFLINE';
-    document.getElementById('pmode').style.color='var(--text3)';
   }
+  setProxyState('err','Server nicht erreichbar — Seed-Daten aktiv.','OFFLINE','var(--text3)');
 }
 
 // AK Picker — Alle togglet an/aus
@@ -835,11 +871,18 @@ function buildStartzustand(){
   selectedMonate.clear();
   const moChips=[...document.querySelectorAll('#mo-picker .chip[data-mo]:not([data-mo=""])')];
   moChips.slice(0,3).forEach(c=>{c.classList.add('sel');selectedMonate.add(c.dataset.mo);});
-  // Verbände: DTTB
+  // Verbände: Berlin + Brandenburg.
+  // Vorher stand hier DTTB — der Bundesverband führt in vielen Monaten
+  // gar keine Turniere, sodass nach dem ersten "Neu suchen!" eine leere
+  // Liste erschien, obwohl Daten geladen waren.
   document.querySelectorAll('#vtabs .chip').forEach(c=>c.classList.remove('sel'));
   selectedVerbände.clear();
-  const dttb=document.getElementById('vtab-DTTB');
-  if(dttb){dttb.classList.add('sel');selectedVerbände.add('DTTB');}
+  START_VERBÄNDE.forEach(k=>{
+    const chip=document.getElementById(`vtab-${k}`);
+    if(chip){chip.classList.add('sel');selectedVerbände.add(k);}
+  });
+  document.getElementById('vb-count').textContent=
+    selectedVerbände.size===0?'(alle)':`(${selectedVerbände.size} ausgewählt)`;
 }
 
 async function searchWeb(){
@@ -918,13 +961,13 @@ async function fetchVerband(v,monat,dot){
   const url=`${v.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendar?federation=${v.fed}&date=${monat}-01`;
   try{
     if(!useProxy) return [];
-    const r=await fetch(PROXY_BASE+'/fetch?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(12000)});
+    const r=await fetch(PROXY_BASE+'/fetch?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(25000)});
     const j=await r.json();
     const t=(j.tournaments||[]).map(t=>({...t,verband:v.name,k:v.k}));
-    dot.style.background=t.length>0?'var(--teal)':'var(--text3)';
+    if(dot)dot.style.background=t.length>0?'var(--teal)':'var(--text3)';
     return t;
   }catch{
-    dot.style.background='var(--text3)';
+    if(dot)dot.style.background='var(--text3)';
     return [];
   }
 }
@@ -932,7 +975,10 @@ async function fetchVerband(v,monat,dot){
 async function startFetch(){
   const btn=document.getElementById('btn');
   const spin=document.getElementById('spin');
-  const monat=selectedMonate.size>0?[...selectedMonate][0]:'2026-05';
+  // Fallback war fest auf '2026-05' verdrahtet und lag damit in der Vergangenheit.
+  const jetzt=new Date();
+  const akt=`${jetzt.getFullYear()}-${String(jetzt.getMonth()+1).padStart(2,'0')}`;
+  const monat=selectedMonate.size>0?[...selectedMonate].sort()[0]:akt;
   btn.disabled=true;spin.style.display='block';
   document.getElementById('btn-lbl').textContent='Lädt…';
   allT=[];
@@ -947,15 +993,28 @@ async function startFetch(){
   dotsEl.style.display='flex';
   dotsEl.innerHTML=VERBÄNDE.map((_,i)=>`<div style="width:8px;height:8px;border-radius:50%;background:var(--border);transition:background 0.2s" id="dot-${i}"></div>`).join('');
 
-  for(let i=0;i<VERBÄNDE.length;i++){
-    const dot=document.getElementById(`dot-${i}`);
-    dot.style.background='var(--red)';
-    document.getElementById('status').textContent=`${VERBÄNDE[i].name} (${i+1}/${VERBÄNDE.length})…`;
-    const neu=await fetchVerband(VERBÄNDE[i],monat,dot);
-    neu.forEach(t=>{if(!allT.find(x=>x.name===t.name&&x.datum===t.datum))allT.push(t)});
-    render();
-    await new Promise(r=>setTimeout(r,100));
+  // Vorher liefen die 18 Verbände strikt nacheinander (plus 100 ms Pause),
+  // was den Abruf unnötig lang gemacht hat. Jetzt fünf gleichzeitig —
+  // begrenzt, damit weder der Proxy noch click-TT überrannt werden.
+  const GLEICHZEITIG=5;
+  let naechster=0, fertig=0;
+
+  async function arbeiter(){
+    while(naechster<VERBÄNDE.length){
+      const i=naechster++;
+      const dot=document.getElementById(`dot-${i}`);
+      if(dot)dot.style.background='var(--red)';
+      const neu=await fetchVerband(VERBÄNDE[i],monat,dot);
+      neu.forEach(t=>{if(!allT.find(x=>x.name===t.name&&x.datum===t.datum))allT.push(t)});
+      fertig++;
+      document.getElementById('status').textContent=`${fertig}/${VERBÄNDE.length} Verbänden abgefragt…`;
+      render();
+    }
   }
+
+  await Promise.all(
+    Array.from({length:Math.min(GLEICHZEITIG,VERBÄNDE.length)},arbeiter)
+  );
 
   btn.disabled=false;spin.style.display='none';
   document.getElementById('btn-lbl').textContent='Neu suchen!';
@@ -1009,11 +1068,13 @@ document.getElementById('ak-count').textContent='(alle)';
   document.getElementById('mo-count').textContent='(3 ausgewählt)';
 })();
 
-// Startzustand Verbände: DTTB ausgewählt
+// Startzustand Verbände: Berlin + Brandenburg
 (()=>{
-  const dttb=document.getElementById('vtab-DTTB');
-  if(dttb){dttb.classList.add('sel');selectedVerbände.add('DTTB');}
-  document.getElementById('vb-count').textContent='(1 ausgewählt)';
+  START_VERBÄNDE.forEach(k=>{
+    const chip=document.getElementById(`vtab-${k}`);
+    if(chip){chip.classList.add('sel');selectedVerbände.add(k);}
+  });
+  document.getElementById('vb-count').textContent=`(${selectedVerbände.size} ausgewählt)`;
 })();
 
 render();

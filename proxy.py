@@ -14,11 +14,36 @@ Die HTML-App (tt-turniersuche.html) verbindet sich automatisch damit.
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import requests, re
+import requests, re, os
+from urllib.parse import urlparse
 from html.parser import HTMLParser
 
 app = Flask(__name__)
 CORS(app)  # erlaubt Anfragen aus dem Browser
+
+# Schluessel kommt aus der Umgebung. Frueher stand er im Klartext hier
+# drin — in einem oeffentlichen Repo. Bei Render unter
+# Settings -> Environment als SERPAPI_KEY hinterlegen.
+SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
+
+ERLAUBTE_HOSTS = ("click-tt.de", "mytischtennis.de")
+
+
+def host_erlaubt(url):
+    """Prueft den geparsten Hostnamen, nicht die rohe Zeichenkette.
+
+    Ein Test wie 'click-tt.de' in url haette auch
+    https://click-tt.de.fremde-domain.example/ durchgelassen.
+    """
+    try:
+        teile = urlparse(url)
+    except ValueError:
+        return False
+    if teile.scheme not in ("http", "https"):
+        return False
+    host = (teile.hostname or "").lower().rstrip(".")
+    return any(host == d or host.endswith("." + d) for d in ERLAUBTE_HOSTS)
+
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; TT-Turniersuche/1.0)",
@@ -82,9 +107,7 @@ def fetch():
     url = request.args.get("url")
     if not url:
         return jsonify({"error": "Kein URL angegeben"}), 400
-    # Sicherheit: nur click-TT Domains erlaubt
-    allowed = ["click-tt.de", "mytischtennis.de"]
-    if not any(d in url for d in allowed):
+    if not host_erlaubt(url):
         return jsonify({"error": "Domain nicht erlaubt"}), 403
     try:
         resp = requests.get(url, headers=HEADERS, timeout=10)
@@ -102,10 +125,11 @@ def websearch():
     if not q:
         return jsonify({"error": "Kein Suchbegriff"}), 400
 
-    serp_api_key = "726cbd759b2391d0e853fef58916b867dae406321cad64378119939d21aa31ef"
+    if not SERPAPI_KEY:
+        return jsonify({"error": "Websuche nicht konfiguriert", "results": []}), 503
 
     try:
-        url = f"https://serpapi.com/search.json?q={requests.utils.quote(q)}&api_key={serp_api_key}&hl=de&gl=de&num=10"
+        url = f"https://serpapi.com/search.json?q={requests.utils.quote(q)}&api_key={SERPAPI_KEY}&hl=de&gl=de&num=10"
         resp = requests.get(url, timeout=10)
         data = resp.json()
 
