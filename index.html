@@ -1020,7 +1020,9 @@ async function startFetch(){
   // Fallback war fest auf '2026-05' verdrahtet und lag damit in der Vergangenheit.
   const jetzt=new Date();
   const akt=`${jetzt.getFullYear()}-${String(jetzt.getMonth()+1).padStart(2,'0')}`;
-  const monat=selectedMonate.size>0?[...selectedMonate].sort()[0]:akt;
+  // Vorher wurde nur [0] abgerufen: wer drei Monate wählte, bekam einen.
+  // Am Monatsende hiess das faktisch "keine Turniere".
+  const monate=selectedMonate.size>0?[...selectedMonate].sort():[akt];
   btn.disabled=true;spin.style.display='block';
   document.getElementById('btn-lbl').textContent='Lädt…';
   allT=[];
@@ -1046,10 +1048,16 @@ async function startFetch(){
       const i=naechster++;
       const dot=document.getElementById(`dot-${i}`);
       if(dot)dot.style.background='var(--red)';
-      const neu=await fetchVerband(VERBÄNDE[i],monat,dot);
-      neu.forEach(t=>{if(!allT.find(x=>x.name===t.name&&x.datum===t.datum))allT.push(t)});
+      let gefunden=0;
+      for(const monat of monate){
+        const neu=await fetchVerband(VERBÄNDE[i],monat,null);
+        neu.forEach(t=>{if(!allT.find(x=>x.name===t.name&&x.datum===t.datum))allT.push(t)});
+        gefunden+=neu.length;
+      }
+      if(dot)dot.style.background=gefunden>0?'var(--teal)':'var(--text3)';
       fertig++;
-      document.getElementById('status').textContent=`${fertig}/${VERBÄNDE.length} Verbänden abgefragt…`;
+      document.getElementById('status').textContent=
+        `${fertig}/${VERBÄNDE.length} Verbänden abgefragt…`;
       render();
     }
   }
