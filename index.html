@@ -96,6 +96,22 @@ input:focus{border-color:var(--red)}
 
 .status-row{font-size:13px;color:var(--text2);margin-bottom:0.6rem;min-height:18px;display:flex;align-items:center;gap:8px}
 
+/* Ladepanel: der Abruf dauert je nach Auswahl bis zu einer halben Minute,
+   und der schlafende Server nochmal bis zu 35 s obendrauf. Ohne sichtbaren
+   Fortschritt halten das die wenigsten aus. */
+.ladepanel{display:none;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:0.75rem}
+.ladepanel.an{display:block}
+.ladepanel h4{font-size:14px;font-weight:600;margin-bottom:3px}
+.ladepanel p{font-size:13px;color:var(--text2);line-height:1.45}
+.balken{height:6px;border-radius:99px;background:var(--bg3);overflow:hidden;margin:10px 0 8px}
+.balken i{display:block;height:100%;width:0;background:var(--red);border-radius:99px;transition:width .35s ease}
+.balken.unbestimmt i{width:38%;animation:wandern 1.5s ease-in-out infinite}
+@keyframes wandern{0%{margin-left:-38%}100%{margin-left:100%}}
+.proxy-bar.warm{background:var(--amber-l);border-color:var(--amber-d)}
+.proxy-bar.warm #pstatus,.proxy-bar.warm #pmode{color:var(--amber-d);font-weight:500}
+.proxy-dot.warm{background:var(--amber-d);animation:pulsen 1.1s ease-in-out infinite}
+@keyframes pulsen{0%,100%{opacity:1}50%{opacity:.25}}
+
 .split{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
 @media(max-width:700px){.split{grid-template-columns:1fr}}
 
@@ -252,6 +268,7 @@ footer a{color:var(--text2)}
       <div class="spin" id="spin"></div>
       <span id="btn-lbl">Neu suchen!</span>
     </button>
+    <div class="chip-hint" id="btn-hint" style="margin-top:6px"></div>
   </div>
 </div>
 
@@ -281,6 +298,12 @@ footer a{color:var(--text2)}
     ⊕ Stattdessen freie Turniere im Web suchen
   </button>
   <div style="font-size:12px;color:var(--text3);margin-top:5px">Zusatzfunktion für Hobbyspieler &amp; Vereinsfeste · Externe Quellen · Qualität variiert</div>
+</div>
+
+<div class="ladepanel" id="ladepanel">
+  <h4 id="lade-titel">Turniere werden geladen</h4>
+  <div class="balken" id="lade-balken"><i id="lade-fuellung"></i></div>
+  <p id="lade-text"></p>
 </div>
 
 <div class="status-row" id="status">Wähle Filter und klicke "Neu suchen!".</div>
@@ -576,6 +599,38 @@ let selectedMonate = new Set();
 let selectedVerbände = new Set();  // leer = alle
 
 // Proxy
+// --- Ladeanzeige -----------------------------------------------------
+function zeigeLadepanel(titel,text,unbestimmt){
+  const p=document.getElementById('ladepanel');
+  document.getElementById('lade-titel').textContent=titel;
+  document.getElementById('lade-text').textContent=text;
+  document.getElementById('lade-balken').classList.toggle('unbestimmt',!!unbestimmt);
+  if(unbestimmt) document.getElementById('lade-fuellung').style.width='';
+  p.classList.add('an');
+}
+function setzeFortschritt(fertig,gesamt,text){
+  document.getElementById('lade-balken').classList.remove('unbestimmt');
+  document.getElementById('lade-fuellung').style.width=
+    Math.round(fertig/gesamt*100)+'%';
+  if(text) document.getElementById('lade-text').textContent=text;
+}
+function versteckeLadepanel(){
+  document.getElementById('ladepanel').classList.remove('an');
+}
+function anzahlMonate(){
+  return selectedMonate.size>0?selectedMonate.size:1;
+}
+function schaetzung(){
+  // Gemessen: rund 10 s je Monat ueber alle 18 Verbaende.
+  return Math.max(10, anzahlMonate()*10);
+}
+function aktualisiereButtonHinweis(){
+  const el=document.getElementById('btn-hint');
+  if(!el) return;
+  const m=anzahlMonate();
+  el.textContent=`Fragt ${VERBÄNDE.length} Landesverbände für ${m} Monat${m===1?'':'e'} ab — dauert etwa ${schaetzung()} Sekunden.`;
+}
+
 function setProxyState(cls,text,mode,color){
   const dot=document.getElementById('pdot');
   dot.classList.remove('ok','err');
@@ -592,12 +647,31 @@ function setProxyState(cls,text,mode,color){
 async function checkProxy(){
   const versuche=[8000,20000,35000];
   setProxyState(null,'Server wird geweckt — beim ersten Aufruf dauert das bis zu einer Minute…','STARTET','var(--text2)');
+  document.getElementById('pdot').classList.add('warm');
+  document.querySelector('.proxy-bar').classList.add('warm');
+
+  // Ist der Server schon wach, antwortet er in unter einer Sekunde.
+  // Dann soll das Panel gar nicht erst aufblitzen.
+  const spaetesZeigen=setTimeout(()=>{
+    zeigeLadepanel('Der Server wacht gerade auf',
+      'Die Seite läuft auf einem kostenlosen Server, der sich nach 15 Minuten ohne Besuch schlafen legt. Das Aufwachen dauert bis zu einer Minute — danach geht alles zügig. Bitte nicht wegklicken.',
+      true);
+  },1200);
+
+  const fertig=()=>{
+    clearTimeout(spaetesZeigen);
+    versteckeLadepanel();
+    document.getElementById('pdot').classList.remove('warm');
+    document.querySelector('.proxy-bar').classList.remove('warm');
+  };
+
   for(let i=0;i<versuche.length;i++){
     try{
       const r=await fetch(PROXY_BASE+'/health',{signal:AbortSignal.timeout(versuche[i])});
       const j=await r.json();
       if(j.status==='ok'){
         useProxy=true;
+        fertig();
         setProxyState('ok','Proxy aktiv — Live-Daten verfügbar','LIVE','var(--teal)');
         return;
       }
@@ -606,6 +680,7 @@ async function checkProxy(){
       setProxyState(null,`Server wird geweckt — Versuch ${i+2} von ${versuche.length}…`,'STARTET','var(--text2)');
     }
   }
+  fertig();
   setProxyState('err','Server nicht erreichbar — Seed-Daten aktiv.','OFFLINE','var(--text3)');
 }
 
@@ -673,6 +748,7 @@ function toggleMo(chip){
     }
   }
   document.getElementById('mo-count').textContent=selectedMonate.size===0?'(alle)':`(${selectedMonate.size} ausgewählt)`;
+  aktualisiereButtonHinweis();
   render();
 }
 
@@ -1027,6 +1103,12 @@ async function startFetch(){
   document.getElementById('btn-lbl').textContent='Lädt…';
   allT=[];
 
+  const monatsWort=monate.length===1?'einen Monat':`${monate.length} Monate`;
+  zeigeLadepanel('Turniere werden geladen',
+    `${VERBÄNDE.length} Landesverbände für ${monatsWort} — das dauert etwa ${schaetzung()} Sekunden. Gefundene Turniere erscheinen schon während des Ladens.`,
+    false);
+  setzeFortschritt(0,VERBÄNDE.length);
+
   let dotsEl=document.getElementById('dots-el');
   if(!dotsEl){
     dotsEl=document.createElement('div');
@@ -1058,6 +1140,8 @@ async function startFetch(){
       fertig++;
       document.getElementById('status').textContent=
         `${fertig}/${VERBÄNDE.length} Verbänden abgefragt…`;
+      setzeFortschritt(fertig,VERBÄNDE.length,
+        `${fertig} von ${VERBÄNDE.length} Verbänden abgefragt · ${allT.length} Turniere gefunden`);
       render();
     }
   }
@@ -1068,6 +1152,7 @@ async function startFetch(){
 
   btn.disabled=false;spin.style.display='none';
   document.getElementById('btn-lbl').textContent='Neu suchen!';
+  versteckeLadepanel();
   document.getElementById('status').textContent=`${allT.length} Turniere geladen.`;
   setTimeout(()=>{if(dotsEl)dotsEl.style.display='none'},2000);
 }
@@ -1116,6 +1201,7 @@ document.getElementById('ak-count').textContent='(alle)';
     selectedMonate.add(c.dataset.mo);
   });
   document.getElementById('mo-count').textContent='(3 ausgewählt)';
+  aktualisiereButtonHinweis();
 })();
 
 // Startzustand Verbände: Berlin + Brandenburg
