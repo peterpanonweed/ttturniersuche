@@ -109,6 +109,7 @@ input:focus{border-color:var(--red)}
 .scard.c-red{border-left:3px solid var(--red)}
 .scard.c-teal{border-left:3px solid var(--teal)}
 
+.tveranst{font-size:12px;color:var(--text2);margin:-2px 0 5px}
 .status-row{font-size:13px;color:var(--text2);margin-bottom:0.6rem;min-height:18px;display:flex;align-items:center;gap:8px}
 
 /* Ladepanel: der Abruf dauert je nach Auswahl bis zu einer halben Minute,
@@ -275,13 +276,13 @@ footer a{color:#fdf6f4;text-decoration:underline}
   </div>
   <div class="scard c-red">
     <div class="num" id="s-jug">0</div>
-    <div class="lbl">Nachwuchsturniere</div>
+    <div class="lbl">davon Nachwuchs</div>
     <div class="sub">Jugend &amp; Mini</div>
   </div>
   <div class="scard c-teal">
     <div class="num" id="s-op">0</div>
-    <div class="lbl">Freie Meldung</div>
-    <div class="sub">offen für alle Verbände</div>
+    <div class="lbl">davon freie Meldung</div>
+    <div class="sub">ohne Einladung meldbar</div>
   </div>
 </div>
 
@@ -560,7 +561,7 @@ async function renderMapAsync(turniere){
     const geo=await getCoordsAsync(t.ort);
     if(meinLauf!==mapLauf) return;
     if(!geo) continue;
-    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const isOffen=istOffen(t);
     const col=isOffen?'#1D9E75':'#E24B4A';
     const icon=L.divIcon({
       className:'',
@@ -572,11 +573,11 @@ async function renderMapAsync(turniere){
     const link=t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'';
     const m=L.marker([geo.lat,geo.lng],{icon})
       .bindPopup(`<div style="font-family:system-ui,sans-serif;min-width:200px">
-        <div style="font-weight:600;font-size:13px;margin-bottom:4px;line-height:1.3">${t.name}</div>
-        <div style="font-size:12px;color:#666;margin-bottom:6px">${dt.d}. ${dt.m} ${dt.y} · ${t.ort}</div>
+        <div style="font-weight:600;font-size:13px;margin-bottom:4px;line-height:1.3">${esc(turnierName(t))}</div>
+        <div style="font-size:12px;color:#666;margin-bottom:6px">${dt.d}. ${dt.m} ${dt.y} · ${esc(sauber(t.ort))}</div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
           <span style="background:${isOffen?'#EAF3DE':'#FCEBEB'};color:${isOffen?'#27500A':'#791F1F'};padding:2px 8px;border-radius:99px;font-size:11px">${isOffen?'Freie Meldung':'Geschlossen'}</span>
-          ${t.altersklasse?`<span style="background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:99px;font-size:11px">${t.altersklasse}</span>`:''}
+          ${teileWerte(t.altersklasse).map(a=>`<span style="background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:99px;font-size:11px">${esc(a)}</span>`).join('')}
         </div>
         ${link?`<a href="${link}" target="_blank" style="font-size:12px;color:#185FA5">Details auf click-TT →</a>`:''}
       </div>`)
@@ -799,14 +800,64 @@ function inSelectedMonths(t){
   }
   return false;
 }
+// --- Auswertung der click-TT-Felder, an einer Stelle -------------------
+// click-TT liefert Mehrfachwerte durch Zeilenumbrueche getrennt, mit viel
+// Leerraum dazwischen: "Damen/Herren" + Umbruch + Tabs + "Nachwuchs".
+function sauber(s){return (s||'').replace(/\s+/g,' ').trim();}
+function teileWerte(s){return (s||'').split(/\r?\n/).map(sauber).filter(Boolean);}
+
+// "Freie Meldung" heisst: man darf ohne Einladung melden. Geprueft an den
+// echten Werten des Kalenders — "keine freie Meldung" und ein alleiniges
+// "eingeladene Spieler" sind beides zu. Vorher galt nur "keine" als zu,
+// wodurch reine Einladungsturniere als offen gezaehlt wurden.
+function istOffen(t){
+  const roh=sauber(t.offenFor).toLowerCase();
+  if(!roh) return false;
+  if(roh.includes('keine freie meldung')) return false;
+  return roh.replace(/eingeladene spieler/g,'').replace(/[,\s]+/g,' ').trim().length>0;
+}
+
+// Die Altersklasse kennt nur Damen/Herren, Nachwuchs und Senioren.
+function istNachwuchs(t){
+  return /nachwuchs|jugend|mini/.test(sauber(t.altersklasse).toLowerCase());
+}
+
+// Die feinere Stufe steht, wenn ueberhaupt, im Namen: "TOP 16/12 Jugend 13".
+// Die Wortgrenzen sind noetig, sonst traefe "11" die TTR-Spanne in
+// "Jugend 1100/1450" und "12" das "TOP 16/12" im Turniernamen.
+function passtJugendstufe(t,stufe){
+  // Regex-Literal statt zusammengebautem String: in '\b' waere das
+  // Backslash-b ein Backspace-Zeichen und keine Wortgrenze.
+  const text=sauber(t.altersklasse)+' '+sauber(t.name);
+  const treffer=text.match(/\b(?:u|jugend|jungen|mädchen|schüler)\s*-?\s*\d{2}\b/gi)||[];
+  return treffer.some(x=>(x.match(/(\d{2})\s*$/)||[])[1]===stufe);
+}
+
+// Gescrapter Fremdtext geht in innerHTML — deshalb maskieren.
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+// Im Namensfeld stehen Turnier und Veranstalter, durch Umbruch getrennt:
+// "4. Kladow Race-Turnier\n   \n   Sportfreunde Kladow".
+function turnierName(t){return teileWerte(t.name)[0]||sauber(t.name);}
+function veranstalter(t){return teileWerte(t.name).slice(1).join(' · ');}
+
+// Ein Turnier von letzter Woche hilft bei der Suche nicht weiter.
+function istVergangen(t){
+  const em=(t.datum||'').match(/- (\d{2})\.(\d{2})\.(\d{4})/);
+  const ende=em?new Date(+em[3],+em[2]-1,+em[1]):parseDat(t.datum);
+  if(!ende) return false;
+  const heute=new Date(); heute.setHours(0,0,0,0);
+  return ende<heute;
+}
+
 function matchAK(t){
   if(selectedAKs.size===0) return true;
-  const hay=((t.altersklasse||'')+' '+(t.name||'')).toLowerCase();
+  const ak_feld=sauber(t.altersklasse).toLowerCase();
   for(const ak of selectedAKs){
-    if(ak==='nachwuchs'&&(hay.includes('nachwuchs')||hay.includes('jugend')||hay.includes('mini'))) return true;
-    if(ak==='herren'&&(hay.includes('herren')||hay.includes('damen'))) return true;
-    if(ak==='senioren'&&hay.includes('senior')) return true;
-    if(['11','13','15','19'].includes(ak)&&hay.includes(ak)) return true;
+    if(ak==='nachwuchs'&&istNachwuchs(t)) return true;
+    if(ak==='herren'&&/damen|herren/.test(ak_feld)) return true;
+    if(ak==='senioren'&&ak_feld.includes('senior')) return true;
+    if(['11','13','15','19'].includes(ak)&&passtJugendstufe(t,ak)) return true;
   }
   return false;
 }
@@ -845,7 +896,7 @@ function renderMap(turniere){
   turniere.forEach((t,idx)=>{
     const geo=getCoords(t.ort);
     if(!geo) return;
-    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const isOffen=istOffen(t);
     const col=isOffen?'#1D9E75':'#E24B4A';
     const icon=L.divIcon({
       className:'',
@@ -857,11 +908,11 @@ function renderMap(turniere){
     const link=t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'';
     const m=L.marker([geo.lat,geo.lng],{icon})
       .bindPopup(`<div style="font-family:system-ui,sans-serif;min-width:200px">
-        <div style="font-weight:600;font-size:13px;margin-bottom:4px;line-height:1.3">${t.name}</div>
-        <div style="font-size:12px;color:#666;margin-bottom:6px">${dt.d}. ${dt.m} ${dt.y} · ${t.ort}</div>
+        <div style="font-weight:600;font-size:13px;margin-bottom:4px;line-height:1.3">${esc(turnierName(t))}</div>
+        <div style="font-size:12px;color:#666;margin-bottom:6px">${dt.d}. ${dt.m} ${dt.y} · ${esc(sauber(t.ort))}</div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
           <span style="background:${isOffen?'#EAF3DE':'#FCEBEB'};color:${isOffen?'#27500A':'#791F1F'};padding:2px 8px;border-radius:99px;font-size:11px">${isOffen?'Freie Meldung':'Geschlossen'}</span>
-          ${t.altersklasse?`<span style="background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:99px;font-size:11px">${t.altersklasse}</span>`:''}
+          ${teileWerte(t.altersklasse).map(a=>`<span style="background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:99px;font-size:11px">${esc(a)}</span>`).join('')}
         </div>
         ${link?`<a href="${link}" target="_blank" style="font-size:12px;color:#185FA5">Details auf click-TT →</a>`:''}
       </div>`)
@@ -884,10 +935,12 @@ function highlightCard(idx){
 function render(){
   const txt=document.getElementById('f-text').value.toLowerCase();
   const nurWeb=false;
+  let vergangen=0;
   let fil=allT.filter(t=>{
     if(nurWeb) return !!t.external;
     if(selectedVerbände.size>0&&!selectedVerbände.has(t.k)) return false;
     if(!matchAK(t)) return false;
+    if(istVergangen(t)){vergangen++;return false;}
     if(txt&&!((t.name||'').toLowerCase().includes(txt)||(t.ort||'').toLowerCase().includes(txt)||(t.verband||'').toLowerCase().includes(txt))) return false;
     if(!inSelectedMonths(t)) return false;
     return true;
@@ -895,8 +948,10 @@ function render(){
   fil.sort((a,b)=>{const da=parseDat(a.datum),db=parseDat(b.datum);if(!da&&!db)return 0;if(!da)return 1;if(!db)return -1;return da-db});
   currentFiltered=fil;
 
-  const jugend=fil.filter(t=>/jugend|nachwuchs|11|13|15|mini/.test(((t.altersklasse||'')+(t.name||'')).toLowerCase()));
-  const offen=fil.filter(t=>!(t.offenFor||'').toLowerCase().includes('keine'));
+  // Vorher wurde hier nach den blossen Ziffern 11/13/15 im Turniernamen
+  // gesucht, was TTR-Spannen wie "Jugend 1100/1450" mitgezaehlt hat.
+  const jugend=fil.filter(istNachwuchs);
+  const offen=fil.filter(istOffen);
 
   const sb=document.getElementById('sumbar');
   if(allT.length>0||fil.length>0){
@@ -910,8 +965,9 @@ function render(){
   initMap();
   renderMapAsync(fil);
 
+  const zusatz=vergangen>0?` · ${vergangen} bereits gelaufen, ausgeblendet`:'';
   document.getElementById('status').textContent=fil.length>0
-    ?`${fil.length} Turnier${fil.length===1?'':'e'} gefunden`
+    ?`${fil.length} Turnier${fil.length===1?'':'e'} gefunden${zusatz}`
     :allT.length>0?'Keine Turniere für diese Auswahl.':'Filter setzen und "Neu suchen!" klicken.';
 
   const el=document.getElementById('results');
@@ -920,15 +976,16 @@ function render(){
     const vb=VERBÄNDE.find(v=>v.k===t.k);
     const link=t.link||(t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'');
     const dt=fmtDate(parseDat(t.datum));
-    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const isOffen=istOffen(t);
     const inner=`
       <div class="datebox"><div class="dday">${dt.d}</div><div class="drest">${dt.m} ${dt.y}</div></div>
       <div>
-        <div class="tname">${t.name}</div>
+        <div class="tname">${esc(turnierName(t))}</div>
+        ${veranstalter(t)?`<div class="tveranst">${esc(veranstalter(t))}</div>`:''}
         <div class="badges">
-          <span class="badge bv">${t.verband||'Extern'}</span>
-          ${t.ort?`<span class="badge bo">${t.ort}</span>`:''}
-          ${t.altersklasse?`<span class="badge ${getAKClass(t.altersklasse)}">${t.altersklasse}</span>`:''}
+          <span class="badge bv">${esc(t.verband||'Extern')}</span>
+          ${t.ort?`<span class="badge bo">${esc(sauber(t.ort))}</span>`:''}
+          ${teileWerte(t.altersklasse).map(a=>`<span class="badge ${getAKClass(a)}">${esc(a)}</span>`).join('')}
           <span class="badge ${isOffen?'bopen':'bclosed'}">${isOffen?'Freie Meldung':'Keine freie Meldung'}</span>
         </div>
       </div>
@@ -1050,7 +1107,7 @@ function renderListe(turniere){
     const vb=VERBÄNDE.find(v=>v.k===t.k);
     const link=t.link||(t.id&&vb?`${vb.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendarDetail?tournament=${t.id}&federation=${vb.fed}`:'');
     const dt=fmtDate(parseDat(t.datum));
-    const isOffen=!(t.offenFor||'').toLowerCase().includes('keine');
+    const isOffen=istOffen(t);
     const inner=`
       <div class="datebox"><div class="dday">${dt.d}</div><div class="drest">${dt.m} ${dt.y}</div></div>
       <div>
@@ -1147,7 +1204,9 @@ async function startFetch(){
   btn.disabled=false;spin.style.display='none';
   document.getElementById('btn-lbl').textContent='Neu suchen!';
   versteckeLadepanel();
-  document.getElementById('status').textContent=`${allT.length} Turniere geladen.`;
+  // Nicht die Ladezahl stehen lassen: render() schreibt das Ergebnis der
+  // aktuellen Auswahl samt Hinweis auf ausgeblendete Turniere.
+  render();
   setTimeout(()=>{if(dotsEl)dotsEl.style.display='none'},2000);
 }
 
@@ -1180,7 +1239,10 @@ function buildMonate(){
 
 buildMonate();
 buildTabs();
-checkProxy();
+// Sobald der Server antwortet, wird direkt gesucht. Vorher musste man
+// erst das Aufwachen abwarten und dann noch von Hand klicken — genau in
+// dieser zweiten Wartezeit springen die Leute ab.
+checkProxy().then(()=>{ if(useProxy) startFetch(); });
 
 // Startzustand Turnierklasse: Alle rot (alle aktiv)
 selectedAKs.clear();
