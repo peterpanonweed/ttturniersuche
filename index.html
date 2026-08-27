@@ -831,6 +831,36 @@ function inSelectedMonths(t){
   }
   return false;
 }
+// --- Turnierdaten im Browser behalten ----------------------------------
+// Der Zwischenspeicher auf dem Server hilft nicht, wenn der Server gerade
+// schlaeft. Deshalb behaelt der Browser die zuletzt geladenen Turniere und
+// zeigt sie sofort an, waehrend im Hintergrund aktualisiert wird.
+const TURNIER_SPEICHER = 'ttt-turniere-v1';
+const TURNIER_TTL = 6 * 3600 * 1000;      // 6 Stunden
+
+function turniereSichern(){
+  try{
+    localStorage.setItem(TURNIER_SPEICHER,
+      JSON.stringify({zeit: Date.now(), daten: allT}));
+  }catch{}                                 // voller Speicher darf nichts kaputtmachen
+}
+
+function turniereLaden(){
+  try{
+    const roh = localStorage.getItem(TURNIER_SPEICHER);
+    if(!roh) return null;
+    const o = JSON.parse(roh);
+    if(!o || !Array.isArray(o.daten) || !o.daten.length) return null;
+    if(Date.now() - o.zeit > TURNIER_TTL) return null;
+    return o;
+  }catch{ return null; }
+}
+
+function uhrzeit(ms){
+  const d = new Date(ms);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
 // --- Auswertung der click-TT-Felder, an einer Stelle -------------------
 // click-TT liefert Mehrfachwerte durch Zeilenumbrueche getrennt, mit viel
 // Leerraum dazwischen: "Damen/Herren" + Umbruch + Tabs + "Nachwuchs".
@@ -1172,7 +1202,7 @@ async function fetchVerband(v,monat,dot){
   }
 }
 
-async function startFetch(){
+async function startFetch(hintergrund=false){
   const btn=document.getElementById('btn');
   const spin=document.getElementById('spin');
   // Fallback war fest auf '2026-05' verdrahtet und lag damit in der Vergangenheit.
@@ -1183,13 +1213,18 @@ async function startFetch(){
   const monate=selectedMonate.size>0?[...selectedMonate].sort():[akt];
   btn.disabled=true;spin.style.display='block';
   document.getElementById('btn-lbl').textContent='Lädt…';
-  allT=[];
 
-  const monatsWort=monate.length===1?'einen Monat':`${monate.length} Monate`;
-  zeigeLadepanel('Turniere werden geladen',
-    `${VERBÄNDE.length} Landesverbände für ${monatsWort} — das dauert etwa ${schaetzung()} Sekunden. Gefundene Turniere erscheinen schon während des Ladens.`,
-    false);
-  setzeFortschritt(0,VERBÄNDE.length);
+  // Beim Aktualisieren im Hintergrund bleibt die bereits angezeigte Liste
+  // stehen und wird erst am Ende ersetzt — sonst blinkt sie kurz leer.
+  const ziel = hintergrund ? [] : (allT = []);
+
+  if(!hintergrund){
+    const monatsWort=monate.length===1?'einen Monat':`${monate.length} Monate`;
+    zeigeLadepanel('Turniere werden geladen',
+      `${VERBÄNDE.length} Landesverbände für ${monatsWort} — das dauert etwa ${schaetzung()} Sekunden. Gefundene Turniere erscheinen schon während des Ladens.`,
+      false);
+    setzeFortschritt(0,VERBÄNDE.length);
+  }
 
   let dotsEl=document.getElementById('dots-el');
   if(!dotsEl){
@@ -1215,16 +1250,18 @@ async function startFetch(){
       let gefunden=0;
       for(const monat of monate){
         const neu=await fetchVerband(VERBÄNDE[i],monat,null);
-        neu.forEach(t=>{if(!allT.find(x=>x.name===t.name&&x.datum===t.datum))allT.push(t)});
+        neu.forEach(t=>{if(!ziel.find(x=>x.name===t.name&&x.datum===t.datum))ziel.push(t)});
         gefunden+=neu.length;
       }
       if(dot)dot.style.background=gefunden>0?'var(--teal)':'var(--text3)';
       fertig++;
-      document.getElementById('status').textContent=
-        `${fertig}/${VERBÄNDE.length} Verbänden abgefragt…`;
-      setzeFortschritt(fertig,VERBÄNDE.length,
-        `${fertig} von ${VERBÄNDE.length} Verbänden abgefragt · ${allT.length} Turniere gefunden`);
-      render();
+      if(!hintergrund){
+        document.getElementById('status').textContent=
+          `${fertig}/${VERBÄNDE.length} Verbänden abgefragt…`;
+        setzeFortschritt(fertig,VERBÄNDE.length,
+          `${fertig} von ${VERBÄNDE.length} Verbänden abgefragt · ${ziel.length} Turniere gefunden`);
+        render();
+      }
     }
   }
 
@@ -1235,6 +1272,10 @@ async function startFetch(){
   btn.disabled=false;spin.style.display='none';
   document.getElementById('btn-lbl').textContent='Neu suchen!';
   versteckeLadepanel();
+  // Im Hintergrundlauf jetzt erst umschalten, damit die alte Liste bis
+  // zuletzt sichtbar bleibt.
+  if(hintergrund) allT=ziel;
+  turniereSichern();
   // Nicht die Ladezahl stehen lassen: render() schreibt das Ergebnis der
   // aktuellen Auswahl samt Hinweis auf ausgeblendete Turniere.
   render();
@@ -1273,7 +1314,10 @@ buildTabs();
 // Sobald der Server antwortet, wird direkt gesucht. Vorher musste man
 // erst das Aufwachen abwarten und dann noch von Hand klicken — genau in
 // dieser zweiten Wartezeit springen die Leute ab.
-checkProxy().then(()=>{ if(useProxy) startFetch(); });
+// Liegt noch eine Liste vom letzten Besuch vor, laeuft die Aktualisierung
+// im Hintergrund: die alte Liste steht sofort da, auch wenn der Server
+// gerade schlaeft.
+checkProxy().then(()=>{ if(useProxy) startFetch(!!turniereLaden()); });
 
 // Startzustand Turnierklasse: Alle rot (alle aktiv)
 selectedAKs.clear();
@@ -1300,7 +1344,17 @@ document.getElementById('ak-count').textContent='(alle)';
   document.getElementById('vb-count').textContent=`(${selectedVerbände.size} ausgewählt)`;
 })();
 
-render();
+// Zuletzt geladene Turniere sofort zeigen. Muss nach dem Setzen der
+// Filter stehen, sonst wuerde gegen leere Auswahlmengen gefiltert.
+(()=>{
+  const alt=turniereLaden();
+  if(!alt) { render(); return; }
+  allT=alt.daten;
+  render();
+  const n=document.querySelectorAll('.tcard').length;
+  document.getElementById('status').textContent=
+    `${n} Turnier${n===1?'':'e'} vom letzten Besuch (Stand ${uhrzeit(alt.zeit)}) — wird aktualisiert…`;
+})();
 document.getElementById('f-text').addEventListener('input',render);
 </script>
 
