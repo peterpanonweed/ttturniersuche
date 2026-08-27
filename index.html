@@ -76,7 +76,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
 .hdr-txt h1{font-size:22px;font-weight:600;line-height:0}
-.logo-schlaeger{width:clamp(54px,12vw,84px);height:auto;flex-shrink:0;
+.logo-schlaeger{width:clamp(86px,19vw,134px);height:auto;flex-shrink:0;
   filter:drop-shadow(0 3px 9px rgba(0,0,0,0.4))}
 .schriftzug{width:clamp(196px,42vw,320px);height:auto;display:block;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,0.35))}
@@ -137,7 +137,18 @@ input:focus{border-color:var(--red)}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
 @media(max-width:700px){.split{grid-template-columns:1fr}}
 
-#map{width:100%;height:600px;border-radius:var(--rl);border:0.5px solid var(--border);position:sticky;top:1rem}
+#map{width:100%;height:600px;border-radius:var(--rl);position:sticky;top:1rem;
+  border:1px solid rgba(255,220,215,0.18);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);overflow:hidden;background:#2a0a0e}
+/* Nur die Kachelebene faerben — Pins, Popups und Legende bleiben unberuehrt. */
+#map .leaflet-tile-pane{
+  filter:grayscale(1) invert(1) brightness(0.82) contrast(1.25)
+         sepia(0.45) hue-rotate(316deg) saturate(1.5)}
+#map .leaflet-control-attribution{
+  background:rgba(28,6,10,0.72);color:rgba(255,235,232,0.72);font-size:10px}
+#map .leaflet-control-attribution a{color:rgba(255,235,232,0.92)}
+#map .leaflet-bar a{background:#2a0a0e;color:#fdf6f4;border-color:rgba(255,220,215,0.2)}
+#map .leaflet-bar a:hover{background:#40121a}
 
 .tlist{display:flex;flex-direction:column;gap:7px}
 .tcard{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:0.85rem 1rem;display:grid;grid-template-columns:60px 1fr auto;gap:10px;align-items:center;text-decoration:none;color:inherit;transition:border-color 0.13s;cursor:pointer}
@@ -227,7 +238,7 @@ footer a{color:#fdf6f4;text-decoration:underline}
 <div class="shell">
 
 <div class="hdr">
-  <img class="logo-schlaeger" src="schlaeger.webp" width="84" height="68" alt="" aria-hidden="true">
+  <img class="logo-schlaeger" src="schlaeger.webp" width="134" height="108" alt="" aria-hidden="true">
   <div class="hdr-txt">
     <h1><img class="schriftzug" src="schriftzug.webp" width="320" height="122"
             alt="Tischtennis Turniersuche"></h1>
@@ -900,7 +911,7 @@ function initMap(){
   const leg=L.control({position:'bottomright'});
   leg.onAdd=()=>{
     const d=L.DomUtil.create('div');
-    d.style.cssText='background:#fff;padding:8px 12px;border-radius:8px;font-size:12px;border:0.5px solid #ddd;line-height:1.8';
+    d.style.cssText='background:rgba(28,6,10,0.86);color:#fdf6f4;padding:9px 13px;border-radius:10px;font-size:12px;border:1px solid rgba(255,220,215,0.22);line-height:1.8;backdrop-filter:blur(3px)';
     d.innerHTML=`<b style="display:block;margin-bottom:4px">Legende</b>
       <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1D9E75;margin-right:5px"></span>Freie Meldung<br>
       <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E24B4A;margin-right:5px"></span>Geschlossen`;
