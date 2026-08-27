@@ -14,7 +14,7 @@ Die HTML-App (tt-turniersuche.html) verbindet sich automatisch damit.
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import requests, re, os
+import requests, re, os, time, threading
 from urllib.parse import urlparse
 from html.parser import HTMLParser
 
@@ -27,6 +27,34 @@ CORS(app)  # erlaubt Anfragen aus dem Browser
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 
 ERLAUBTE_HOSTS = ("click-tt.de", "mytischtennis.de")
+
+# Zwischenspeicher. Gemessen liegt der Engpass nicht im Netz, sondern in der
+# Rechenleistung dieser Instanz: acht gleichzeitige Abrufe derselben Seite
+# brauchen je 3 s statt 1,1 s. Mehr Gleichzeitigkeit hilft deshalb nicht,
+# weniger Arbeit schon. Ein Turnierkalender aendert sich hoechstens taeglich.
+KALENDER_TTL = 1800      # 30 Minuten
+SUCHE_TTL = 21600        # 6 Stunden — jeder SerpAPI-Aufruf kostet Geld
+_speicher = {}
+_speicher_schloss = threading.Lock()
+
+
+def gespeichert(schluessel, ttl):
+    with _speicher_schloss:
+        eintrag = _speicher.get(schluessel)
+        if not eintrag:
+            return None
+        abgelegt, wert = eintrag
+        if time.time() - abgelegt > ttl:
+            _speicher.pop(schluessel, None)
+            return None
+        return wert
+
+
+def speichern(schluessel, wert):
+    with _speicher_schloss:
+        if len(_speicher) > 400:     # Deckel, damit der Speicher nicht waechst
+            _speicher.clear()
+        _speicher[schluessel] = (time.time(), wert)
 
 
 def host_erlaubt(url):
@@ -109,13 +137,20 @@ def fetch():
         return jsonify({"error": "Kein URL angegeben"}), 400
     if not host_erlaubt(url):
         return jsonify({"error": "Domain nicht erlaubt"}), 403
+
+    fertig = gespeichert(("fetch", url), KALENDER_TTL)
+    if fertig is not None:
+        return jsonify({**fertig, "aus_speicher": True})
+
     try:
         # click-TT antwortet beim ersten Aufruf nach einer Ruhephase traege.
         resp = requests.get(url, headers=HEADERS, timeout=20)
         resp.encoding = "utf-8"
         parser = TurnierParser()
         parser.feed(resp.text)
-        return jsonify({"tournaments": parser.tournaments, "url": url})
+        ergebnis = {"tournaments": parser.tournaments, "url": url}
+        speichern(("fetch", url), ergebnis)
+        return jsonify(ergebnis)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -128,6 +163,10 @@ def websearch():
 
     if not SERPAPI_KEY:
         return jsonify({"error": "Websuche nicht konfiguriert", "results": []}), 503
+
+    fertig = gespeichert(("suche", q.lower()), SUCHE_TTL)
+    if fertig is not None:
+        return jsonify({**fertig, "aus_speicher": True})
 
     try:
         url = f"https://serpapi.com/search.json?q={requests.utils.quote(q)}&api_key={SERPAPI_KEY}&hl=de&gl=de&num=10"
@@ -152,7 +191,9 @@ def websearch():
                 "verband": "Freier Veranstalter",
                 "external": True,
             })
-        return jsonify({"results": results, "query": q})
+        ergebnis = {"results": results, "query": q}
+        speichern(("suche", q.lower()), ergebnis)
+        return jsonify(ergebnis)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
