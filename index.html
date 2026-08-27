@@ -1104,7 +1104,7 @@ async function searchWeb(){
   const q=`Tischtennis Turnier ${moName} ${yr} offen anmelden Deutschland`;
 
   try{
-    const r=await fetch(PROXY_BASE+'/websearch?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(15000)});
+    const r=await fetch(PROXY_BASE+'/websearch?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(35000)});
     const j=await r.json();
     if(j.results&&j.results.length>0){
       webErgebnisse=j.results.map(res=>({...res,k:'EXT',external:true}));

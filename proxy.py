@@ -110,7 +110,8 @@ def fetch():
     if not host_erlaubt(url):
         return jsonify({"error": "Domain nicht erlaubt"}), 403
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
+        # click-TT antwortet beim ersten Aufruf nach einer Ruhephase traege.
+        resp = requests.get(url, headers=HEADERS, timeout=20)
         resp.encoding = "utf-8"
         parser = TurnierParser()
         parser.feed(resp.text)
@@ -130,7 +131,9 @@ def websearch():
 
     try:
         url = f"https://serpapi.com/search.json?q={requests.utils.quote(q)}&api_key={SERPAPI_KEY}&hl=de&gl=de&num=10"
-        resp = requests.get(url, timeout=10)
+        # SerpAPI braucht beim ersten Aufruf regelmaessig laenger als 10 s;
+        # gemessen lief genau daran der erste Klick nach dem Aufwachen ins Leere.
+        resp = requests.get(url, timeout=25)
         data = resp.json()
 
         if "organic_results" not in data:
