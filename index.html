@@ -76,6 +76,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
 .hdr-txt h1{font-size:22px;font-weight:600;line-height:0}
+.logo-schlaeger{width:clamp(54px,12vw,84px);height:auto;flex-shrink:0;
+  filter:drop-shadow(0 3px 9px rgba(0,0,0,0.4))}
 .schriftzug{width:clamp(196px,42vw,320px);height:auto;display:block;
   filter:drop-shadow(0 4px 12px rgba(0,0,0,0.35))}
 .hdr-txt p{font-size:13px;color:var(--text2);margin-top:1px}
@@ -225,12 +227,7 @@ footer a{color:#fdf6f4;text-decoration:underline}
 <div class="shell">
 
 <div class="hdr">
-  <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-    <rect x="27" y="30" width="5" height="16" rx="2.5" fill="#7a4a2a" transform="rotate(-38 27 30)"/>
-    <circle cx="19" cy="19" r="15" fill="#E24B4A"/>
-    <circle cx="19" cy="19" r="15" fill="none" stroke="#c03a39" stroke-width="1"/>
-    <circle cx="37" cy="7" r="5" fill="white" stroke="#ddd" stroke-width="1"/>
-  </svg>
+  <img class="logo-schlaeger" src="schlaeger.webp" width="84" height="68" alt="" aria-hidden="true">
   <div class="hdr-txt">
     <h1><img class="schriftzug" src="schriftzug.webp" width="320" height="122"
             alt="Tischtennis Turniersuche"></h1>
