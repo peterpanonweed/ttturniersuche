@@ -173,10 +173,14 @@ footer a{color:var(--text2)}
 .legal-links a:hover{color:var(--text)}
 
 /* Kaffeekasse (PayPal) */
-.bmc{display:inline-flex;align-items:center;gap:8px;margin-top:1.25rem;padding:9px 18px;background:#0070BA;color:#fff;border-radius:99px;font-size:13px;font-weight:600;text-decoration:none;transition:transform 0.12s,box-shadow 0.12s;box-shadow:0 2px 8px rgba(0,0,0,0.12)}
+.bmc{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:#0070BA;color:#fff;border-radius:99px;font-size:13px;font-weight:600;text-decoration:none;transition:transform 0.12s,box-shadow 0.12s;box-shadow:0 2px 8px rgba(0,0,0,0.12)}
 .bmc:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,112,186,0.35);color:#fff;background:#005ea6}
 .bmc svg{flex-shrink:0}
-.bmc-hint{font-size:11px;color:var(--text3);margin-top:6px}
+.bmc-hint{font-size:11px;color:rgba(253,246,244,0.94);margin-top:6px}
+.kaffee{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:1.25rem;flex-wrap:wrap}
+.kaffee-pott{width:120px;height:auto;flex-shrink:0;filter:drop-shadow(0 6px 16px rgba(0,0,0,0.4))}
+.kaffee-txt{text-align:left}
+@media(max-width:520px){.kaffee{gap:4px}.kaffee-txt{text-align:center}}
 
 /* Impressum-Modal */
 .modal-ov{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
@@ -311,22 +315,21 @@ footer a{color:#fdf6f4;text-decoration:underline}
 </div>
 
 <footer>
-  <p style="font-size:13px;color:var(--text2);max-width:600px;margin:0 auto 1rem;line-height:1.7;font-style:italic">
+  <p style="font-size:13px;color:rgba(253,246,244,0.9);max-width:600px;margin:0 auto 1rem;line-height:1.7;font-style:italic">
     Diese Seite ist ein privates Hobbyprojekt — entwickelt von einem Tischtennisvater, weil so eine Übersicht einfach gefehlt hat. Keine Verbindung zum DTTB oder einem Landesverband. Alle Daten kommen direkt von den offiziellen click-TT Seiten der Verbände. Feedback willkommen, Kritik auch — aber bitte nett. 🏓
   </p>
   Datenquellen: <a href="https://dttb.click-tt.de" target="_blank">click-TT / DTTB</a> · alle 18 Landesverbände · kein offizielles Produkt des DTTB · v1.5
   <div>
-    <a class="bmc" href="https://paypal.me/adamiberlin" target="_blank" rel="noopener">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 8h11a3 3 0 0 1 0 6h-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M3 8h13v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        <path d="M7 3.5c.6.6.6 1.4 0 2M10.5 3.5c.6.6.6 1.4 0 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-      Spendier mir einen Kaffee
-    </a>
-    <div class="bmc-hint">Freiwillige Unterstützung für die Serverkosten · läuft über PayPal</div>
+    <div class="kaffee">
+      <img class="kaffee-pott" src="kaffee-pott.webp" width="120" height="105" loading="lazy"
+           alt="Comiczeichnung einer übergelaufenen Kaffeetasse">
+      <div class="kaffee-txt">
+        <a class="bmc" href="https://paypal.me/adamiberlin" target="_blank" rel="noopener">Spendier mir einen Kaffee</a>
+        <div class="bmc-hint">Freiwillige Unterstützung für die Serverkosten · läuft über PayPal</div>
+      </div>
+    </div>
   </div>
-  <p style="margin-top:0.75rem;font-size:11px;color:var(--text3);max-width:600px;margin-left:auto;margin-right:auto">
+  <p style="margin-top:0.75rem;font-size:11px;color:rgba(253,246,244,0.92);max-width:600px;margin-left:auto;margin-right:auto">
     Tischtennis Turniere Deutschland · Tischtennisturnier Suche · Tischtennis Turnierkalender ·
     Jugend Tischtennis U11 U13 U15 U19 · Nachwuchs Tischtennis · Offene Tischtennisturniere · DTTB · click-TT
   </p>
