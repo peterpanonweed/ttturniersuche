@@ -620,6 +620,9 @@ async function renderMapAsync(turniere){
 
 
 let allT = [];
+// Verbaende, die im letzten Lauf nicht geantwortet haben. render() weist
+// darauf hin, damit fehlende Turniere nicht wie "gibt es nicht" wirken.
+let fehlendeVerbände = [];
 let selectedAKs = new Set();       // leer = alle
 let selectedMonate = new Set();
 let selectedVerbände = new Set();  // leer = alle
@@ -1027,9 +1030,12 @@ function render(){
   renderMapAsync(fil);
 
   const zusatz=vergangen>0?` · ${vergangen} bereits gelaufen, ausgeblendet`:'';
+  const fehlt=fehlendeVerbände.length===0?'':
+    ` · ${fehlendeVerbände.length===1?'1 Verband war':`${fehlendeVerbände.length} Verbände waren`}`+
+    ` nicht erreichbar (${fehlendeVerbände.join(', ')}) — dort fehlen Turniere`;
   document.getElementById('status').textContent=fil.length>0
-    ?`${fil.length} Turnier${fil.length===1?'':'e'} gefunden${zusatz}`
-    :allT.length>0?'Keine Turniere für diese Auswahl.':'Filter setzen und "Neu suchen!" klicken.';
+    ?`${fil.length} Turnier${fil.length===1?'':'e'} gefunden${zusatz}${fehlt}`
+    :allT.length>0?`Keine Turniere für diese Auswahl.${fehlt}`:'Filter setzen und "Neu suchen!" klicken.';
 
   const el=document.getElementById('results');
   if(fil.length===0){el.innerHTML=`<div class="empty">🏓 Keine Turniere für diese Auswahl.</div>`;return;}
@@ -1187,18 +1193,25 @@ function renderListe(turniere){
 }
 
 // Fetch
-async function fetchVerband(v,monat,dot){
+// Der Kaltstart des kostenlosen Servers dauert bis zu einer Minute. Mit den
+// vorherigen 25 s lief die erste Abfrage nach einer Ruhephase zwangslaeufig
+// in den Timeout, und der Verband fiel still aus der Liste.
+const VERBAND_TIMEOUT = 60000;
+
+// Liefert {ok, turniere}: "nicht erreichbar" ist etwas anderes als "keine
+// Turniere" und muss bis in die Anzeige durchgereicht werden. Vorher sah
+// beides gleich aus — eine leere Liste.
+async function fetchVerband(v,monat){
   const url=`${v.base}/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/tournamentCalendar?federation=${v.fed}&date=${monat}-01`;
+  if(!useProxy) return {ok:false,turniere:[]};
   try{
-    if(!useProxy) return [];
-    const r=await fetch(PROXY_BASE+'/fetch?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(25000)});
+    const r=await fetch(PROXY_BASE+'/fetch?url='+encodeURIComponent(url),{signal:AbortSignal.timeout(VERBAND_TIMEOUT)});
+    if(!r.ok) return {ok:false,turniere:[]};
     const j=await r.json();
-    const t=(j.tournaments||[]).map(t=>({...t,verband:v.name,k:v.k}));
-    if(dot)dot.style.background=t.length>0?'var(--teal)':'var(--text3)';
-    return t;
+    if(j.error) return {ok:false,turniere:[]};
+    return {ok:true,turniere:(j.tournaments||[]).map(t=>({...t,verband:v.name,k:v.k}))};
   }catch{
-    if(dot)dot.style.background='var(--text3)';
-    return [];
+    return {ok:false,turniere:[]};
   }
 }
 
@@ -1241,19 +1254,24 @@ async function startFetch(hintergrund=false){
   // begrenzt, damit weder der Proxy noch click-TT überrannt werden.
   const GLEICHZEITIG=5;
   let naechster=0, fertig=0;
+  fehlendeVerbände=[];
 
   async function arbeiter(){
     while(naechster<VERBÄNDE.length){
       const i=naechster++;
       const dot=document.getElementById(`dot-${i}`);
-      if(dot)dot.style.background='var(--red)';
-      let gefunden=0;
+      // Grau = laeuft gerade, tuerkis = Turniere da, hell = leer,
+      // rot = nicht erreichbar. Rot war vorher der Laufzustand.
+      if(dot)dot.style.background='var(--text2)';
+      let gefunden=0, geklappt=true;
       for(const monat of monate){
-        const neu=await fetchVerband(VERBÄNDE[i],monat,null);
-        neu.forEach(t=>{if(!ziel.find(x=>x.name===t.name&&x.datum===t.datum))ziel.push(t)});
-        gefunden+=neu.length;
+        const antwort=await fetchVerband(VERBÄNDE[i],monat);
+        if(!antwort.ok) geklappt=false;
+        antwort.turniere.forEach(t=>{if(!ziel.find(x=>x.name===t.name&&x.datum===t.datum))ziel.push(t)});
+        gefunden+=antwort.turniere.length;
       }
-      if(dot)dot.style.background=gefunden>0?'var(--teal)':'var(--text3)';
+      if(!geklappt) fehlendeVerbände.push(VERBÄNDE[i].name);
+      if(dot)dot.style.background=!geklappt?'var(--red)':(gefunden>0?'var(--teal)':'var(--text3)');
       fertig++;
       if(!hintergrund){
         document.getElementById('status').textContent=
@@ -1275,7 +1293,10 @@ async function startFetch(hintergrund=false){
   // Im Hintergrundlauf jetzt erst umschalten, damit die alte Liste bis
   // zuletzt sichtbar bleibt.
   if(hintergrund) allT=ziel;
-  turniereSichern();
+  // Ein Lauf, bei dem Verbaende ausgefallen sind, darf den letzten
+  // vollstaendigen nicht ueberschreiben — sonst fehlen die Turniere
+  // dieses Verbands bis zu sechs Stunden lang.
+  if(fehlendeVerbände.length===0) turniereSichern();
   // Nicht die Ladezahl stehen lassen: render() schreibt das Ergebnis der
   // aktuellen Auswahl samt Hinweis auf ausgeblendete Turniere.
   render();
