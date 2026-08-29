@@ -155,6 +155,14 @@ input:focus{border-color:var(--red)}
 .tcard:hover{border-color:var(--border2)}
 .tcard.external{border-left:3px solid var(--purple-d)}
 .tcard.highlighted{border-color:var(--red);box-shadow:0 0 0 2px rgba(226,75,74,0.15)}
+/* Punkt auf der Karte. Groesse und Rand standen vorher inline im divIcon;
+   fuer den Hover-Zustand braucht es eine Klasse. */
+.pin{width:14px;height:14px;border-radius:50%;border:2px solid #fff;
+  box-shadow:0 2px 5px rgba(0,0,0,0.25);
+  transition:transform .14s ease,box-shadow .14s ease}
+/* Leuchtet auf, solange die Maus ueber dem zugehoerigen Listeneintrag steht. */
+.pin.pin-hi{transform:scale(1.8);
+  box-shadow:0 0 0 7px rgba(226,75,74,0.32),0 3px 9px rgba(0,0,0,0.4)}
 .datebox{background:var(--bg2);border-radius:var(--r);padding:6px 4px;text-align:center;flex-shrink:0}
 .dday{font-size:20px;font-weight:600;line-height:1}
 .drest{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.04em;margin-top:2px}
@@ -472,6 +480,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeImpressum();cl
 let leafletMap = null;
 let currentFiltered = [];
 let mapMarkers = [];
+// Liste und Karte zeigen dieselben Turniere, aber nicht in derselben
+// Reihenfolge: Orte ohne Koordinaten bekommen keinen Punkt. Die Position
+// in mapMarkers taugt deshalb nicht als Zuordnung — der Listenindex schon.
+let markerNachIndex = new Map();
+let hervorgehobenerPin = null;
 
 // Voreingestellte Verbände beim Seitenaufruf.
 // BTTV = Berlin (Bayern ist BTTV-B), TTVB = Brandenburg.
@@ -586,6 +599,8 @@ async function renderMapAsync(turniere){
   const meinLauf = ++mapLauf;
   mapMarkers.forEach(m=>leafletMap.removeLayer(m));
   mapMarkers=[];
+  markerNachIndex.clear();
+  hervorgehobenerPin=null;
   for(let idx=0;idx<turniere.length;idx++){
     if(meinLauf!==mapLauf) return;
     const t=turniere[idx];
@@ -596,7 +611,7 @@ async function renderMapAsync(turniere){
     const col=isOffen?'#1D9E75':'#E24B4A';
     const icon=L.divIcon({
       className:'',
-      html:`<div style="width:14px;height:14px;border-radius:50%;background:${col};border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,0.25)"></div>`,
+      html:`<div class="pin" style="background:${col}"></div>`,
       iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-10]
     });
     const dt=fmtDate(parseDat(t.datum));
@@ -615,6 +630,7 @@ async function renderMapAsync(turniere){
       .on('click',()=>highlightCard(idx));
     m.addTo(leafletMap);
     mapMarkers.push(m);
+    markerNachIndex.set(idx,m);
   }
 }
 
@@ -957,6 +973,8 @@ function renderMap(turniere){
   if(!leafletMap) return;
   mapMarkers.forEach(m=>leafletMap.removeLayer(m));
   mapMarkers=[];
+  markerNachIndex.clear();
+  hervorgehobenerPin=null;
   turniere.forEach((t,idx)=>{
     const geo=getCoords(t.ort);
     if(!geo) return;
@@ -964,7 +982,7 @@ function renderMap(turniere){
     const col=isOffen?'#1D9E75':'#E24B4A';
     const icon=L.divIcon({
       className:'',
-      html:`<div style="width:14px;height:14px;border-radius:50%;background:${col};border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,0.25)"></div>`,
+      html:`<div class="pin" style="background:${col}"></div>`,
       iconSize:[14,14],iconAnchor:[7,7],popupAnchor:[0,-10]
     });
     const dt=fmtDate(parseDat(t.datum));
@@ -983,7 +1001,35 @@ function renderMap(turniere){
       .on('click',()=>highlightCard(idx));
     m.addTo(leafletMap);
     mapMarkers.push(m);
+    markerNachIndex.set(idx,m);
   });
+}
+
+// Beim Ueberfahren eines Listeneintrags den passenden Punkt aufleuchten
+// lassen — aber nur, wenn er gerade im Kartenausschnitt liegt. Die Karte
+// springt bewusst nicht nach: Wer die Entfernung abschaetzen will, braucht
+// einen ruhigen Ausschnitt.
+function pinHervorheben(idx){
+  pinZuruecksetzen();
+  if(!leafletMap) return;
+  const m=markerNachIndex.get(idx);
+  if(!m) return;
+  if(!leafletMap.getBounds().contains(m.getLatLng())) return;
+  const el=m.getElement();
+  const punkt=el&&el.querySelector('.pin');
+  if(!punkt) return;
+  punkt.classList.add('pin-hi');
+  m.setZIndexOffset(1000);          // sonst verdecken Nachbarpunkte ihn
+  hervorgehobenerPin=m;
+}
+
+function pinZuruecksetzen(){
+  if(!hervorgehobenerPin) return;
+  const el=hervorgehobenerPin.getElement();
+  const punkt=el&&el.querySelector('.pin');
+  if(punkt) punkt.classList.remove('pin-hi');
+  hervorgehobenerPin.setZIndexOffset(0);
+  hervorgehobenerPin=null;
 }
 
 function highlightCard(idx){
@@ -1058,8 +1104,8 @@ function render(){
       </div>
       <div class="tarrow">${link?'→':''}</div>`;
     return link
-      ?`<a class="tcard${t.external?' external':''}" href="${link}" target="_blank" onclick="highlightCard(${idx})">${inner}</a>`
-      :`<div class="tcard${t.external?' external':''}" onclick="highlightCard(${idx})">${inner}</div>`;
+      ?`<a class="tcard${t.external?' external':''}" data-idx="${idx}" href="${link}" target="_blank" onclick="highlightCard(${idx})">${inner}</a>`
+      :`<div class="tcard${t.external?' external':''}" data-idx="${idx}" onclick="highlightCard(${idx})">${inner}</div>`;
   }).join('');
 }
 
@@ -1187,8 +1233,8 @@ function renderListe(turniere){
       </div>
       <div class="tarrow">${link?'→':''}</div>`;
     return link
-      ?`<a class="tcard external" href="${link}" target="_blank">${inner}</a>`
-      :`<div class="tcard external">${inner}</div>`;
+      ?`<a class="tcard external" data-idx="${idx}" href="${link}" target="_blank">${inner}</a>`
+      :`<div class="tcard external" data-idx="${idx}">${inner}</div>`;
   }).join('');
 }
 
@@ -1376,6 +1422,19 @@ document.getElementById('ak-count').textContent='(alle)';
   document.getElementById('status').textContent=
     `${n} Turnier${n===1?'':'e'} vom letzten Besuch (Stand ${uhrzeit(alt.zeit)}) — wird aktualisiert…`;
 })();
+// Ein Handler fuer die ganze Liste statt einer pro Karte: render() baut
+// die Karten bei jedem Filterwechsel neu, einzelne Handler waeren dann weg.
+(()=>{
+  const liste=document.getElementById('results');
+  liste.addEventListener('mouseover',e=>{
+    const karte=e.target.closest('.tcard');
+    if(!karte||!liste.contains(karte)) return;
+    const idx=Number(karte.dataset.idx);
+    if(Number.isInteger(idx)) pinHervorheben(idx);
+  });
+  liste.addEventListener('mouseleave',pinZuruecksetzen);
+})();
+
 document.getElementById('f-text').addEventListener('input',render);
 </script>
 
